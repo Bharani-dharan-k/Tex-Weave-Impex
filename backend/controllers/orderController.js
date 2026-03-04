@@ -5,10 +5,20 @@ import Product from '../models/Product.js';
 import User from '../models/User.js';
 
 // Initialize Razorpay
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET
-});
+let razorpay;
+try {
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    console.error('Razorpay credentials not found in environment variables');
+  } else {
+    razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET
+    });
+    console.log('Razorpay initialized successfully');
+  }
+} catch (error) {
+  console.error('Error initializing Razorpay:', error);
+}
 
 // @desc    Create Razorpay order
 // @route   POST /api/orders/create-razorpay-order
@@ -16,6 +26,12 @@ const razorpay = new Razorpay({
 export const createRazorpayOrder = async (req, res) => {
   try {
     const { items, shippingAddress, billingAddress, notes } = req.body;
+
+    if (!razorpay) {
+      return res.status(500).json({ 
+        message: 'Payment gateway not configured. Please contact support.' 
+      });
+    }
 
     if (!items || items.length === 0) {
       return res.status(400).json({ message: 'No items in the order' });
