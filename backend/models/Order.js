@@ -98,16 +98,11 @@ const orderSchema = new mongoose.Schema({
 });
 
 // Generate unique order ID
-orderSchema.pre('save', async function(next) {
+orderSchema.pre('save', async function() {
   if (!this.orderId) {
-    try {
-      const count = await this.constructor.countDocuments();
-      this.orderId = `ORD-${Date.now()}-${String(count + 1).padStart(5, '0')}`;
-    } catch (error) {
-      return next(error);
-    }
+    const count = await this.constructor.countDocuments();
+    this.orderId = `ORD-${Date.now()}-${String(count + 1).padStart(5, '0')}`;
   }
-  next();
 });
 
 // Index for faster queries
