@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 const orderSchema = new mongoose.Schema({
   orderId: {
     type: String,
-    required: true,
     unique: true
   },
   user: {
@@ -101,8 +100,12 @@ const orderSchema = new mongoose.Schema({
 // Generate unique order ID
 orderSchema.pre('save', async function(next) {
   if (!this.orderId) {
-    const count = await this.constructor.countDocuments();
-    this.orderId = `ORD-${Date.now()}-${String(count + 1).padStart(5, '0')}`;
+    try {
+      const count = await this.constructor.countDocuments();
+      this.orderId = `ORD-${Date.now()}-${String(count + 1).padStart(5, '0')}`;
+    } catch (error) {
+      return next(error);
+    }
   }
   next();
 });
