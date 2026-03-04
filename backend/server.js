@@ -12,6 +12,7 @@ import forecastRoutes from "./routes/forecastRoutes.js";
 import profitabilityRoutes from "./routes/profitabilityRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/customer", customerRoutes);
+app.use("/api/orders", orderRoutes);
 app.use("/api/analytics/sales", salesAnalyticsRoutes);
 app.use("/api/analytics/inventory", inventoryAnalyticsRoutes);
 app.use("/api/analytics/slow-stock", slowStockRoutes);

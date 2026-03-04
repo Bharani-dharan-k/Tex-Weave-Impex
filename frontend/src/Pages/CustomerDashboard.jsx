@@ -78,6 +78,11 @@ const CustomerDashboard = ({ user, onLogout }) => {
   const [newMessage, setNewMessage] = useState('')
   const [chatLoading, setChatLoading] = useState(false)
 
+  // Cart and Order states
+  const [cart, setCart] = useState([])
+  const [orders, setOrders] = useState([])
+  const [ordersLoading, setOrdersLoading] = useState(false)
+
   // Fetch products
   useEffect(() => {
     if (currentPage === 'products') {
@@ -101,6 +106,13 @@ const CustomerDashboard = ({ user, onLogout }) => {
   useEffect(() => {
     if (currentPage === 'profile') {
       fetchProfile()
+    }
+  }, [currentPage])
+
+  // Fetch orders when orders page is active
+  useEffect(() => {
+    if (currentPage === 'orders') {
+      fetchOrders()
     }
   }, [currentPage])
 
@@ -190,6 +202,151 @@ const CustomerDashboard = ({ user, onLogout }) => {
     } catch (error) {
       console.error('Error copying address:', error)
       alert('Failed to copy address')
+    }
+  }
+
+  // Cart functions
+  const addToCart = (product, quantity = 1) => {
+    const existingItem = cart.find(item => item._id === product._id)
+    
+    if (existingItem) {
+      setCart(cart.map(item =>
+        item._id === product._id
+          ? { ...item, quantity: item.quantity + quantity }
+          : item
+      ))
+    } else {
+      setCart([...cart, { ...product, quantity }])
+    }
+    
+    alert(`${product.productName} added to cart!`)
+  }
+
+  const removeFromCart = (productId) => {
+    setCart(cart.filter(item => item._id !== productId))
+  }
+
+  const updateCartQuantity = (productId, quantity) => {
+    if (quantity <= 0) {
+      removeFromCart(productId)
+      return
+    }
+    
+    setCart(cart.map(item =>
+      item._id === productId ? { ...item, quantity } : item
+    ))
+  }
+
+  const clearCart = () => {
+    setCart([])
+  }
+
+  const getCartTotal = () => {
+    return cart.reduce((total, item) => total + (item.sellingPrice * item.quantity), 0)
+  }
+
+  // Order functions
+  const fetchOrders = async () => {
+    setOrdersLoading(true)
+    try {
+      const response = await axios.get('/api/orders/my-orders')
+      setOrders(response.data.orders || [])
+    } catch (error) {
+      console.error('Error fetching orders:', error)
+    } finally {
+      setOrdersLoading(false)
+    }
+  }
+
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script')
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+      script.onload = () => resolve(true)
+      script.onerror = () => resolve(false)
+      document.body.appendChild(script)
+    })
+  }
+
+  const handleCheckout = async () => {
+    if (cart.length === 0) {
+      alert('Your cart is empty!')
+      return
+    }
+
+    if (!profile || !profile.shippingAddress || !profile.shippingAddress.street) {
+      alert('Please complete your profile with shipping address before placing an order.')
+      setCurrentPage('profile')
+      return
+    }
+
+    try {
+      // Load Razorpay script
+      const loaded = await loadRazorpayScript()
+      if (!loaded) {
+        alert('Failed to load payment gateway. Please try again.')
+        return
+      }
+
+      // Create order items for backend
+      const items = cart.map(item => ({
+        productId: item._id,
+        quantity: item.quantity
+      }))
+
+      // Create Razorpay order
+      const orderResponse = await axios.post('/api/orders/create-razorpay-order', {
+        items,
+        shippingAddress: profile.shippingAddress,
+        billingAddress: profile.billingAddress || profile.shippingAddress
+      })
+
+      const { razorpayOrderId, amount, currency, keyId, orderId } = orderResponse.data.order
+
+      // Razorpay options
+      const options = {
+        key: keyId,
+        amount: amount * 100,
+        currency: currency,
+        name: 'Tex Weave Impex',
+        description: 'Purchase Order',
+        order_id: razorpayOrderId,
+        handler: async function (response) {
+          try {
+            // Verify payment
+            const verifyResponse = await axios.post('/api/orders/verify-payment', {
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+              orderId: orderId
+            })
+
+            if (verifyResponse.data.success) {
+              alert('Payment successful! Your order has been placed.')
+              clearCart()
+              setCurrentPage('orders')
+              fetchOrders()
+            }
+          } catch (error) {
+            console.error('Payment verification failed:', error)
+            alert('Payment verification failed. Please contact support.')
+          }
+        },
+        prefill: {
+          name: profile.name || user.name,
+          email: profile.email || user.email,
+          contact: profile.phone || ''
+        },
+        theme: {
+          color: '#667eea'
+        }
+      }
+
+      const paymentObject = new window.Razorpay(options)
+      paymentObject.open()
+    } catch (error) {
+      console.error('Checkout error:', error)
+      alert('Failed to initiate checkout. Please try again.')
     }
   }
 
@@ -325,8 +482,9 @@ const CustomerDashboard = ({ user, onLogout }) => {
             className={`nav-item ${currentPage === 'orders' ? 'active' : ''}`}
             onClick={() => setCurrentPage('orders')}
           >
-            <span className="nav-icon"></span>
+            <span className="nav-icon">🛒</span>
             {sidebarOpen && <span className="nav-text">My Orders</span>}
+            {cart.length > 0 && <span className="cart-badge">{cart.length}</span>}
           </button>
           
           <button 
@@ -435,8 +593,16 @@ const CustomerDashboard = ({ user, onLogout }) => {
                 )}
               </div>
               <div className="modal-footer-section">
-                <button className="btn-contact">Contact for Order</button>
-                <button className="btn-inquiry">Send Inquiry</button>
+                <button 
+                  className="btn-add-to-cart" 
+                  onClick={() => {
+                    addToCart(selectedProduct, 1)
+                    setSelectedProduct(null)
+                  }}
+                >
+                  Add to Cart
+                </button>
+                <button className="btn-contact">Contact for Bulk Order</button>
               </div>
             </div>
           </div>
@@ -534,15 +700,143 @@ const CustomerDashboard = ({ user, onLogout }) => {
 
   // Orders Page
   function renderOrdersPage() {
+    if (ordersLoading) {
+      return (
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <p>Loading orders...</p>
+        </div>
+      )
+    }
+
     return (
       <div className="orders-page">
-        <div className="empty-state">
-          <div className="empty-icon">🛒</div>
-          <h2>No Orders Yet</h2>
-          <p>Start browsing our products to place your first order</p>
-          <button className="btn-browse" onClick={() => setCurrentPage('products')}>
-            Browse Products
-          </button>
+        {/* Cart Section */}
+        {cart.length > 0 && (
+          <div className="cart-section">
+            <div className="cart-header">
+              <h3>Shopping Cart ({cart.length} items)</h3>
+              <button className="btn-clear-cart" onClick={clearCart}>Clear Cart</button>
+            </div>
+            <div className="cart-items">
+              {cart.map(item => (
+                <div key={item._id} className="cart-item">
+                  <div className="cart-item-info">
+                    <h4>{item.productName}</h4>
+                    <p className="cart-item-id">ID: {item.productId}</p>
+                    <p className="cart-item-price">₹{item.sellingPrice.toLocaleString()} / {item.unit}</p>
+                  </div>
+                  <div className="cart-item-actions">
+                    <div className="quantity-controls">
+                      <button onClick={() => updateCartQuantity(item._id, item.quantity - 1)}>-</button>
+                      <span>{item.quantity}</span>
+                      <button onClick={() => updateCartQuantity(item._id, item.quantity + 1)}>+</button>
+                    </div>
+                    <p className="cart-item-total">₹{(item.sellingPrice * item.quantity).toLocaleString()}</p>
+                    <button className="btn-remove" onClick={() => removeFromCart(item._id)}>Remove</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="cart-footer">
+              <div className="cart-summary">
+                <div className="summary-row">
+                  <span>Subtotal:</span>
+                  <span>₹{getCartTotal().toLocaleString()}</span>
+                </div>
+                <div className="summary-row">
+                  <span>Tax (18% GST):</span>
+                  <span>₹{(getCartTotal() * 0.18).toLocaleString()}</span>
+                </div>
+                <div className="summary-row">
+                  <span>Shipping:</span>
+                  <span>{getCartTotal() > 10000 ? 'FREE' : '₹200'}</span>
+                </div>
+                <div className="summary-row total">
+                  <span>Total:</span>
+                  <span>₹{(getCartTotal() * 1.18 + (getCartTotal() > 10000 ? 0 : 200)).toLocaleString()}</span>
+                </div>
+              </div>
+              <button className="btn-checkout" onClick={handleCheckout}>
+                Proceed to Checkout
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Orders History */}
+        <div className="orders-history">
+          <h3>Order History</h3>
+          {orders.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-icon">📦</div>
+              <h2>No Orders Yet</h2>
+              <p>Start browsing our products to place your first order</p>
+              <button className="btn-browse" onClick={() => setCurrentPage('products')}>
+                Browse Products
+              </button>
+            </div>
+          ) : (
+            <div className="orders-list">
+              {orders.map(order => (
+                <div key={order._id} className="order-card">
+                  <div className="order-header">
+                    <div>
+                      <h4>Order #{order.orderId}</h4>
+                      <p className="order-date">{new Date(order.createdAt).toLocaleDateString('en-IN', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}</p>
+                    </div>
+                    <div className="order-status-badges">
+                      <span className={`status-badge ${order.orderStatus}`}>
+                        {order.orderStatus.toUpperCase()}
+                      </span>
+                      <span className={`status-badge ${order.paymentStatus}`}>
+                        {order.paymentStatus === 'completed' ? 'PAID' : 'PENDING'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="order-items">
+                    {order.items.map((item, index) => (
+                      <div key={index} className="order-item">
+                        <span>{item.productName}</span>
+                        <span>Qty: {item.quantity} {item.unit}</span>
+                        <span>₹{item.totalPrice.toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="order-footer">
+                    <div className="order-total">
+                      <span>Total Amount:</span>
+                      <span className="total-amount">₹{order.totalAmount.toLocaleString()}</span>
+                    </div>
+                    {order.orderStatus === 'pending' && order.paymentStatus === 'completed' && (
+                      <button 
+                        className="btn-cancel-order"
+                        onClick={async () => {
+                          if (window.confirm('Are you sure you want to cancel this order?')) {
+                            try {
+                              await axios.put(`/api/orders/${order._id}/cancel`, {
+                                reason: 'Customer request'
+                              })
+                              alert('Order cancelled successfully')
+                              fetchOrders()
+                            } catch (error) {
+                              alert('Failed to cancel order')
+                            }
+                          }
+                        }}
+                      >
+                        Cancel Order
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     )
