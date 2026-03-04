@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from '../utils/axiosConfig'
-import { MessageCircle, Send } from 'lucide-react'
 import './CustomerDashboard.css'
 
 const CustomerDashboard = ({ user, onLogout }) => {
@@ -48,35 +47,14 @@ const CustomerDashboard = ({ user, onLogout }) => {
     }
   })
 
-  // Chat states
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: 'admin',
-      message: 'Hello! How can I help you today?',
-      timestamp: new Date(Date.now() - 3600000)
-    },
-    {
-      id: 2,
-      sender: 'customer',
-      message: 'Hi, I wanted to inquire about bulk orders.',
-      timestamp: new Date(Date.now() - 3000000)
-    },
-    {
-      id: 3,
-      sender: 'admin',
-      message: 'Sure! We offer special pricing for bulk orders. What quantity are you interested in?',
-      timestamp: new Date(Date.now() - 2400000)
-    },
-    {
-      id: 4,
-      sender: 'customer',
-      message: 'I need around 1000 units. Can you provide a quote?',
-      timestamp: new Date(Date.now() - 1800000)
-    }
-  ])
-  const [newMessage, setNewMessage] = useState('')
-  const [chatLoading, setChatLoading] = useState(false)
+  // Report Issue and Contact states
+  const [issueForm, setIssueForm] = useState({
+    subject: '',
+    category: 'general',
+    description: '',
+    priority: 'medium'
+  })
+  const [issueSubmitting, setIssueSubmitting] = useState(false)
 
   // Cart and Order states
   const [cart, setCart] = useState([])
@@ -95,12 +73,7 @@ const CustomerDashboard = ({ user, onLogout }) => {
     fetchCategories()
   }, [])
 
-  // Load chat messages when chat page is active
-  useEffect(() => {
-    if (currentPage === 'chat') {
-      loadChatMessages()
-    }
-  }, [currentPage])
+
 
   // Fetch profile when profile page is active
   useEffect(() => {
@@ -375,53 +348,34 @@ const CustomerDashboard = ({ user, onLogout }) => {
     }
   }
 
-  const loadChatMessages = async () => {
-    setChatLoading(true)
+  const handleIssueSubmit = async (e) => {
+    e.preventDefault()
+    if (!issueForm.subject.trim() || !issueForm.description.trim()) {
+      alert('Please fill in all required fields')
+      return
+    }
+
+    setIssueSubmitting(true)
     try {
-      // TODO: Replace with actual API call
-      // const response = await axios.get(`/api/chat/admin`)
-      // setMessages(response.data.messages)
+      // TODO: Replace with actual API call to submit issue
+      // await axios.post('/api/support/issue', issueForm)
       
-      // Using mock data for now
+      // Mock success for now
       setTimeout(() => {
-        setChatLoading(false)
+        alert('Issue reported successfully! Our team will contact you soon.')
+        setIssueForm({
+          subject: '',
+          category: 'general',
+          description: '',
+          priority: 'medium'
+        })
+        setIssueSubmitting(false)
       }, 500)
     } catch (error) {
-      console.error('Error loading messages:', error)
-      setChatLoading(false)
+      console.error('Error submitting issue:', error)
+      alert('Failed to submit issue. Please try again.')
+      setIssueSubmitting(false)
     }
-  }
-
-  const handleSendMessage = async (e) => {
-    e.preventDefault()
-    if (!newMessage.trim()) return
-
-    const messageData = {
-      sender: 'customer',
-      message: newMessage,
-      timestamp: new Date()
-    }
-
-    try {
-      // TODO: Replace with actual API call
-      // await axios.post('/api/chat/send', {
-      //   receiverId: 'admin',
-      //   message: newMessage
-      // })
-
-      // Add message to local state for now
-      setMessages([...messages, { ...messageData, id: messages.length + 1 }])
-      setNewMessage('')
-    } catch (error) {
-      console.error('Error sending message:', error)
-    }
-  }
-
-  const formatTime = (date) => {
-    return new Date(date).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit'
-    })
   }
 
   const handleProductClick = (product) => {
@@ -443,8 +397,10 @@ const CustomerDashboard = ({ user, onLogout }) => {
         return renderOrdersPage()
       case 'profile':
         return renderProfilePage()
-      case 'chat':
-        return renderChatPage()
+      case 'report':
+        return renderReportIssuePage()
+      case 'contact':
+        return renderContactPage()
       default:
         return renderHomePage()
     }
@@ -466,7 +422,7 @@ const CustomerDashboard = ({ user, onLogout }) => {
             className={`nav-item ${currentPage === 'home' ? 'active' : ''}`}
             onClick={() => setCurrentPage('home')}
           >
-            <span className="nav-icon"></span>
+            <span className="nav-icon">🛖</span>
             {sidebarOpen && <span className="nav-text">Home</span>}
           </button>
           
@@ -474,7 +430,7 @@ const CustomerDashboard = ({ user, onLogout }) => {
             className={`nav-item ${currentPage === 'products' ? 'active' : ''}`}
             onClick={() => setCurrentPage('products')}
           >
-            <span className="nav-icon"></span>
+            <span className="nav-icon">🛍️</span>
             {sidebarOpen && <span className="nav-text">Products</span>}
           </button>
           
@@ -491,16 +447,24 @@ const CustomerDashboard = ({ user, onLogout }) => {
             className={`nav-item ${currentPage === 'profile' ? 'active' : ''}`}
             onClick={() => setCurrentPage('profile')}
           >
-            <span className="nav-icon"></span>
+            <span className="nav-icon">👤</span>
             {sidebarOpen && <span className="nav-text">Profile</span>}
           </button>
           
           <button 
-            className={`nav-item ${currentPage === 'chat' ? 'active' : ''}`}
-            onClick={() => setCurrentPage('chat')}
+            className={`nav-item ${currentPage === 'report' ? 'active' : ''}`}
+            onClick={() => setCurrentPage('report')}
           >
-            <MessageCircle size={20} />
-            {sidebarOpen && <span className="nav-text">Chat with Admin</span>}
+            <span className="nav-icon">⚠️</span>
+            {sidebarOpen && <span className="nav-text">Report Issue</span>}
+          </button>
+          
+          <button 
+            className={`nav-item ${currentPage === 'contact' ? 'active' : ''}`}
+            onClick={() => setCurrentPage('contact')}
+          >
+            <span className="nav-icon">📞</span>
+            {sidebarOpen && <span className="nav-text">Contact</span>}
           </button>
         </nav>
 
@@ -525,7 +489,8 @@ const CustomerDashboard = ({ user, onLogout }) => {
               {currentPage === 'products' && 'Products'}
               {currentPage === 'orders' && 'My Orders'}
               {currentPage === 'profile' && 'Profile'}
-              {currentPage === 'chat' && 'Chat with Admin'}
+              {currentPage === 'report' && 'Report Issue'}
+              {currentPage === 'contact' && 'Contact Us'}
             </h1>
           </div>
           
@@ -1144,70 +1109,185 @@ const CustomerDashboard = ({ user, onLogout }) => {
     )
   }
 
-  // Chat Page
-  function renderChatPage() {
-
+  // Report Issue Page
+  function renderReportIssuePage() {
     return (
-      <div className="customer-chat-page">
-        <div className="chat-page-header">
-          <h2>Chat with Admin</h2>
-          <p>Send your inquiries and get quick responses</p>
+      <div className="report-issue-page">
+        <div className="page-header">
+          <h2>Report an Issue</h2>
+          <p>Having a problem? Let us know and we'll help you resolve it.</p>
         </div>
 
-        <div className="chat-container-single">
-          {/* Chat Window */}
-          <div className="chat-window">
-            {/* Chat Header */}
-            <div className="chat-header">
-              <div className="chat-header-left">
-                <div className="admin-avatar">
-                  A
-                </div>
-                <div className="admin-info">
-                  <h3>Admin Support</h3>
-                  <span className="admin-status">Online</span>
-                </div>
+        <div className="report-issue-form-container">
+          <form className="report-issue-form" onSubmit={handleIssueSubmit}>
+            <div className="form-group">
+              <label htmlFor="subject">Subject *</label>
+              <input
+                type="text"
+                id="subject"
+                value={issueForm.subject}
+                onChange={(e) => setIssueForm({ ...issueForm, subject: e.target.value })}
+                placeholder="Brief description of the issue"
+                required
+              />
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="category">Category</label>
+                <select
+                  id="category"
+                  value={issueForm.category}
+                  onChange={(e) => setIssueForm({ ...issueForm, category: e.target.value })}
+                >
+                  <option value="general">General</option>
+                  <option value="order">Order Related</option>
+                  <option value="payment">Payment Issue</option>
+                  <option value="product">Product Quality</option>
+                  <option value="delivery">Delivery Issue</option>
+                  <option value="technical">Technical Problem</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="priority">Priority</label>
+                <select
+                  id="priority"
+                  value={issueForm.priority}
+                  onChange={(e) => setIssueForm({ ...issueForm, priority: e.target.value })}
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                </select>
               </div>
             </div>
 
-            {/* Messages Area */}
-            <div className="chat-messages">
-              {chatLoading ? (
-                <div className="chat-loading">Loading messages...</div>
-              ) : messages.length === 0 ? (
-                <div className="no-messages">
-                  <MessageCircle size={48} />
-                  <p>No messages yet. Start a conversation!</p>
-                </div>
-              ) : (
-                messages.map((msg) => (
-                  <div 
-                    key={msg.id} 
-                    className={`message ${msg.sender === 'customer' ? 'sent' : 'received'}`}
-                  >
-                    <div className="message-content">
-                      {msg.message}
-                    </div>
-                    <div className="message-time">
-                      {formatTime(msg.timestamp)}
-                    </div>
-                  </div>
-                ))
-              )}
+            <div className="form-group">
+              <label htmlFor="description">Description *</label>
+              <textarea
+                id="description"
+                value={issueForm.description}
+                onChange={(e) => setIssueForm({ ...issueForm, description: e.target.value })}
+                placeholder="Please provide detailed information about the issue..."
+                rows="6"
+                required
+              />
             </div>
 
-            {/* Message Input */}
-            <form className="chat-input-form" onSubmit={handleSendMessage}>
-              <input
-                type="text"
-                className="chat-input"
-                placeholder="Type your message..."
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-              />
-              <button type="submit" className="send-button">
-                <Send size={20} />
-              </button>
+            <button 
+              type="submit" 
+              className="btn-submit-issue"
+              disabled={issueSubmitting}
+            >
+              {issueSubmitting ? 'Submitting...' : 'Submit Issue'}
+            </button>
+          </form>
+
+          <div className="issue-info">
+            <h3>What happens next?</h3>
+            <ul>
+              <li>✓ Your issue will be reviewed by our support team</li>
+              <li>✓ We'll respond within 24-48 hours</li>
+              <li>✓ You'll receive updates via email</li>
+              <li>✓ Track your issue status in your profile</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Contact Page
+  function renderContactPage() {
+    return (
+      <div className="contact-page">
+        <div className="page-header">
+          <h2>Contact Us</h2>
+          <p>Get in touch with Tex Weave Impex. We're here to help!</p>
+        </div>
+
+        <div className="contact-content">
+          <div className="contact-info-section">
+            <div className="contact-card">
+              <div className="contact-icon">📍</div>
+              <h3>Office Address</h3>
+              <p>Tex Weave Impex Pvt. Ltd.</p>
+              <p>123 Textile Street, Commercial District</p>
+              <p>Mumbai, Maharashtra 400001</p>
+              <p>India</p>
+            </div>
+
+            <div className="contact-card">
+              <div className="contact-icon">📞</div>
+              <h3>Phone</h3>
+              <p><strong>Sales:</strong> +91 98765 43210</p>
+              <p><strong>Support:</strong> +91 98765 43211</p>
+              <p><strong>Office:</strong> +91 22 1234 5678</p>
+              <p className="contact-time">Mon - Sat: 9:00 AM - 6:00 PM</p>
+            </div>
+
+            <div className="contact-card">
+              <div className="contact-icon">✉️</div>
+              <h3>Email</h3>
+              <p><strong>General:</strong> info@texweaveimpex.com</p>
+              <p><strong>Sales:</strong> sales@texweaveimpex.com</p>
+              <p><strong>Support:</strong> support@texweaveimpex.com</p>
+              <p className="contact-time">We respond within 24 hours</p>
+            </div>
+
+            <div className="contact-card">
+              <div className="contact-icon">🌐</div>
+              <h3>Business Hours</h3>
+              <p><strong>Monday - Friday:</strong> 9:00 AM - 6:00 PM</p>
+              <p><strong>Saturday:</strong> 9:00 AM - 2:00 PM</p>
+              <p><strong>Sunday:</strong> Closed</p>
+              <p className="contact-time">Indian Standard Time (IST)</p>
+            </div>
+          </div>
+
+          <div className="quick-contact-section">
+            <h3>Quick Contact Form</h3>
+            <p>Need immediate assistance? Fill out this form and we'll get back to you shortly.</p>
+            <form className="quick-contact-form" onSubmit={(e) => {
+              e.preventDefault()
+              alert('Thank you for contacting us! We will respond to your inquiry soon.')
+              e.target.reset()
+            }}>
+              <div className="form-group">
+                <label>Your Name *</label>
+                <input type="text" placeholder="Enter your full name" required />
+              </div>
+              
+              <div className="form-group">
+                <label>Email *</label>
+                <input type="email" placeholder="your.email@example.com" required />
+              </div>
+              
+              <div className="form-group">
+                <label>Phone Number</label>
+                <input type="tel" placeholder="+91 98765 43210" />
+              </div>
+              
+              <div className="form-group">
+                <label>Inquiry Type</label>
+                <select>
+                  <option value="product">Product Inquiry</option>
+                  <option value="bulk">Bulk Order</option>
+                  <option value="partnership">Partnership</option>
+                  <option value="support">Customer Support</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              
+              <div className="form-group">
+                <label>Message *</label>
+                <textarea placeholder="Tell us how we can help you..." rows="4" required></textarea>
+              </div>
+              
+              <button type="submit" className="btn-send-inquiry">Send Inquiry</button>
             </form>
           </div>
         </div>
