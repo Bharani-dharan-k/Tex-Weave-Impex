@@ -219,7 +219,7 @@ const CustomerDashboard = ({ user, onLogout }) => {
       setCart([...cart, { ...product, quantity }])
     }
     
-    alert(`${product.productName} added to cart!`)
+    alert(`${product.name} added to cart!`)
   }
 
   const removeFromCart = (productId) => {
@@ -722,7 +722,7 @@ const CustomerDashboard = ({ user, onLogout }) => {
               {cart.map(item => (
                 <div key={item._id} className="cart-item">
                   <div className="cart-item-info">
-                    <h4>{item.productName}</h4>
+                    <h4>{item.name}</h4>
                     <p className="cart-item-id">ID: {item.productId}</p>
                     <p className="cart-item-price">₹{item.sellingPrice.toLocaleString()} / {item.unit}</p>
                   </div>

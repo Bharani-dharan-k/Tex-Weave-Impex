@@ -36,7 +36,7 @@ export const createRazorpayOrder = async (req, res) => {
 
       orderItems.push({
         product: product._id,
-        productName: product.productName,
+        productName: product.name,
         productId: product.productId,
         quantity: item.quantity,
         unit: product.unit,
