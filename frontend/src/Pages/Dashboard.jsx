@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { DollarSign, ShoppingCart, Users, TrendingUp, Package, BarChart3, Factory, Settings, CheckCircle, Truck } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { DollarSign, ShoppingCart, Users, TrendingUp, Package, BarChart3, Factory, Settings, CheckCircle, Truck, Upload, FileSpreadsheet, PieChart as PieChartIcon, AlertTriangle } from 'lucide-react'
 import './Dashboard.css'
 import '../analytics/components/KPICard.css'
 import '../analytics/components/Charts.css'
@@ -92,11 +93,104 @@ const Dashboard = ({ user, onLogout }) => {
     { id: 'process', label: 'Process Flow', icon: Factory },
     { id: 'manufacturing', label: 'Time & Throughput', icon: Settings },
     { id: 'quality', label: 'Quality Control', icon: CheckCircle },
-    { id: 'dispatch', label: 'Packing & Dispatch', icon: Truck }
+    { id: 'dispatch', label: 'Packing & Dispatch', icon: Truck },
+    { id: 'analytics', label: 'Data Analytics', icon: PieChartIcon }
   ];
 
   const renderTabContent = () => {
     switch(activeTab) {
+      case 'analytics':
+        return (
+          <div className="analytics-section">
+            <div className="section-header">
+              <h2>Textile Data Analytics Hub</h2>
+              <p>Comprehensive analytics for Tex Weave Impex</p>
+            </div>
+
+            {/* Quick Access Cards */}
+            <div className="analytics-quick-access">
+              <Link to="/analytics-dashboard" className="analytics-card">
+                <div className="card-icon" style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}>
+                  <BarChart3 size={32} />
+                </div>
+                <div className="card-content">
+                  <h3>Analytics Dashboard</h3>
+                  <p>Comprehensive overview with KPIs, sales trends, and inventory insights</p>
+                  <span className="card-link">View Dashboard →</span>
+                </div>
+              </Link>
+
+              <Link to="/data-upload" className="analytics-card">
+                <div className="card-icon" style={{background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'}}>
+                  <Upload size={32} />
+                </div>
+                <div className="card-content">
+                  <h3>Data Upload</h3>
+                  <p>Import products, sales, and inventory data via CSV/Excel files</p>
+                  <span className="card-link">Upload Data →</span>
+                </div>
+              </Link>
+
+              <Link to="/analytics/sales" className="analytics-card">
+                <div className="card-icon" style={{background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'}}>
+                  <TrendingUp size={32} />
+                </div>
+                <div className="card-content">
+                  <h3>Sales Analytics</h3>
+                  <p>Product-wise sales, trends, top performers, and regional analysis</p>
+                  <span className="card-link">View Analytics →</span>
+                </div>
+              </Link>
+
+              <Link to="/analytics/inventory" className="analytics-card">
+                <div className="card-icon" style={{background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'}}>
+                  <Package size={32} />
+                </div>
+                <div className="card-content">
+                  <h3>Inventory Analytics</h3>
+                  <p>Stock levels, low stock alerts, inventory value by category</p>
+                  <span className="card-link">View Analytics →</span>
+                </div>
+              </Link>
+
+              <Link to="/analytics/products" className="analytics-card">
+                <div className="card-icon" style={{background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'}}>
+                  <PieChartIcon size={32} />
+                </div>
+                <div className="card-content">
+                  <h3>Product Performance</h3>
+                  <p>Profitability analysis, demand forecasting, and slow-moving stock</p>
+                  <span className="card-link">View Analytics →</span>
+                </div>
+              </Link>
+
+              <Link to="/reports" className="analytics-card">
+                <div className="card-icon" style={{background: 'linear-gradient(135deg, #fdcbf1 0%, #e6dee9 100%)'}}>
+                  <FileSpreadsheet size={32} />
+                </div>
+                <div className="card-content">
+                  <h3>Reports</h3>
+                  <p>Download comprehensive reports in Excel format</p>
+                  <span className="card-link">Generate Reports →</span>
+                </div>
+              </Link>
+            </div>
+
+
+            {/* Future Enhancements Note */}
+            <div className="future-scope">
+              <div className="future-icon">🚀</div>
+              <div className="future-content">
+                <h3>Future Enhancements</h3>
+                <p><strong>ERP Integration:</strong> Connect with existing ERP systems via REST APIs for real-time data sync</p>
+                <p><strong>Real-time Analytics:</strong> WebSocket integration for live dashboard updates</p>
+                <p><strong>Role-based Access:</strong> Separate dashboards for Sales Manager, Inventory Manager, and Admin</p>
+                <p><strong>Advanced ML:</strong> Machine learning models for better demand forecasting and anomaly detection</p>
+                <p><strong>Mobile App:</strong> Native mobile application for on-the-go analytics access</p>
+              </div>
+            </div>
+          </div>
+        );
       case 'overview':
         return renderOverview();
       case 'product':

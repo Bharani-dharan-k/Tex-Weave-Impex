@@ -1,0 +1,11 @@
+productId,productName,quantityInStock,reorderLevel,maxStockLevel,warehouseLocation,lastRestockDate
+PROD001,Cotton Fabric,500,10,1000,Main Warehouse,2024-01-01
+PROD002,Polyester Blend,300,15,800,Main Warehouse,2024-01-05
+PROD003,Silk Material,150,5,500,Premium Warehouse,2024-01-10
+PROD004,Linen Fabric,400,12,900,Main Warehouse,2024-01-12
+PROD005,Wool Blend,250,8,700,Main Warehouse,2024-01-15
+PROD006,Denim Material,600,20,1200,Main Warehouse,2024-01-18
+PROD007,Satin Fabric,350,10,850,Premium Warehouse,2024-01-20
+PROD008,Velvet Material,200,6,600,Premium Warehouse,2024-01-22
+PROD009,Chiffon Fabric,180,7,550,Premium Warehouse,2024-01-25
+PROD010,Tweed Fabric,280,9,750,Main Warehouse,2024-01-28

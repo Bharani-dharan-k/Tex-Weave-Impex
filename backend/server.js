@@ -3,6 +3,15 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
+import productRoutes from "./routes/productRoutes.js";
+import salesAnalyticsRoutes from "./routes/salesAnalyticsRoutes.js";
+import inventoryAnalyticsRoutes from "./routes/inventoryAnalyticsRoutes.js";
+import slowStockRoutes from "./routes/slowStockRoutes.js";
+import forecastRoutes from "./routes/forecastRoutes.js";
+import profitabilityRoutes from "./routes/profitabilityRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
+import customerRoutes from "./routes/customerRoutes.js";
 
 dotenv.config();
 
@@ -18,6 +27,15 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/upload", uploadRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/customer", customerRoutes);
+app.use("/api/analytics/sales", salesAnalyticsRoutes);
+app.use("/api/analytics/inventory", inventoryAnalyticsRoutes);
+app.use("/api/analytics/slow-stock", slowStockRoutes);
+app.use("/api/analytics/forecast", forecastRoutes);
+app.use("/api/analytics/profitability", profitabilityRoutes);
+app.use("/api/reports", reportRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {

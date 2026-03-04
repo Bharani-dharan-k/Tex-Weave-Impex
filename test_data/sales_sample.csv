@@ -1,0 +1,11 @@
+invoiceId,productId,productName,quantitySold,unitPrice,totalAmount,costPrice,saleDate,customerName,region,paymentStatus,salesPerson
+INV001,PROD001,Cotton Fabric,100,750,75000,500,2024-01-15,ABC Corp,North,Paid,John Doe
+INV002,PROD002,Polyester Blend,50,650,32500,400,2024-01-16,XYZ Ltd,South,Paid,Jane Smith
+INV003,PROD003,Silk Material,25,1800,45000,1200,2024-01-17,DEF Inc,East,Pending,Bob Wilson
+INV004,PROD004,Linen Fabric,75,900,67500,600,2024-01-18,GHI Corp,West,Paid,Alice Brown
+INV005,PROD005,Wool Blend,60,1200,72000,800,2024-01-19,JKL Ltd,North,Paid,Charlie Davis
+INV006,PROD001,Cotton Fabric,120,750,90000,500,2024-01-20,MNO Inc,South,Paid,John Doe
+INV007,PROD006,Denim Material,90,850,76500,550,2024-01-21,PQR Corp,East,Paid,Jane Smith
+INV008,PROD007,Satin Fabric,40,700,28000,450,2024-01-22,STU Ltd,West,Pending,Bob Wilson
+INV009,PROD008,Velvet Material,30,1100,33000,700,2024-01-23,VWX Inc,North,Paid,Alice Brown
+INV010,PROD009,Chiffon Fabric,35,1400,49000,900,2024-01-24,YZ Corp,South,Paid,Charlie Davis

@@ -23,6 +23,58 @@
   animation: slideUp 0.5s ease-out;
 }
 
+/* Role Selection Styles */
+.role-selection {
+  padding: 40px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.role-card {
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 30px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.role-card:hover {
+  background: white;
+  border-color: #3b5998;
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(59, 89, 152, 0.2);
+}
+
+.role-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+.role-card h3 {
+  color: #3b5998;
+  font-size: 18px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.role-card p {
+  color: #6c757d;
+  font-size: 13px;
+  margin: 0;
+}
+
+/* Responsive for role selection */
+@media (max-width: 480px) {
+  .role-selection {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding: 30px 20px;
+  }
+}
+
 @keyframes slideUp {
   from {
     opacity: 0;
@@ -33,6 +85,45 @@
     transform: translateY(0);
   }
 }
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  margin: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #3b5998;
+  background: rgb(255, 255, 255);
+  border: 1px solid #4175a9;
+  border-radius: 6px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+  font-family: "Inter", sans-serif;
+}
+
+.back-button:hover {
+  background: #68a7e5;
+  color: #2d4373;
+  border-color: #3b5998;
+  transform: translateX(-2px);
+}
+
+.back-button:active {
+  transform: translateX(0) scale(0.98);
+}
+
+.back-button::before {
+  content: "←";
+  font-size: 16px;
+  transition: transform 0.25s ease;
+}
+
+.back-button:hover::before {
+  transform: translateX(-3px);
+}
+
 
 .login-header {
   background: white;
@@ -135,10 +226,10 @@
   width: 100%;
   max-width: 100%;
   padding: 14px;
-  background: #3b5998;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -146,14 +237,14 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-top: 10px;
-  font-family: 'Segoe UI', 'Arial', sans-serif;
+  font-family: "Inter", sans-serif;
   box-sizing: border-box;
 }
 
 .login-button:hover:not(:disabled) {
-  background: #2d4373;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 89, 152, 0.3);
+  background: linear-gradient(135deg, #5a67d8 0%, #6b42a0 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
 }
 
 .login-button:active {
@@ -189,6 +280,82 @@
   text-decoration: underline;
 }
 
-.forgot-password:hover {
+/* New styles for forgot password link and signup link */
+.forgot-password-link {
+  text-align: right;
+  margin-bottom: 20px;
+}
+
+.forgot-password-link a {
+  color: #3b5998;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.forgot-password-link a:hover {
+  color: #2d4373;
   text-decoration: underline;
+}
+
+/* Link button style - makes button look like a text link */
+.link-button {
+  background: none;
+  border: none;
+  color: #3b5998;
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  font-size: inherit;
+  font-family: "Inter", sans-serif;
+  padding: 0;
+  margin: 0;
+  display: inline;
+}
+
+.link-button:hover {
+  color: #2d4373;
+  text-decoration: underline;
+}
+
+.forgot-password-link .link-button {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.signup-link {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e9ecef;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.signup-link a {
+  color: #3b5998;
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.signup-link a:hover {
+  color: #2d4373;
+  text-decoration: underline;
+}
+
+.success-message {
+  background: #d4edda;
+  color: #155724;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  border-left: 4px solid #28a745;
+  font-family: 'Inter', sans-serif;
+  animation: slideDown 0.3s ease-out;
 }

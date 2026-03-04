@@ -4,13 +4,9 @@ import axios from "./utils/axiosConfig";
 import { initSessionMonitor, stopSessionMonitor } from "./utils/sessionManager";
 import Home from "./Pages/Home1.jsx";
 import Login from "./Pages/Login.jsx";
-import Dashboard from "./Pages/Dashboard.jsx";
-import AnalyticsLayout from "./analytics/AnalyticsLayout.jsx";
-import AnalyticsDashboard from "./analytics/pages/AnalyticsDashboard.jsx";
-import SalesAnalytics from "./analytics/pages/SalesAnalytics.jsx";
-import ProductPerformance from "./analytics/pages/ProductPerformance.jsx";
-import InventoryAnalytics from "./analytics/pages/InventoryAnalytics.jsx";
-import CustomerAnalytics from "./analytics/pages/CustomerAnalytics.jsx";
+import ResetPassword from "./Pages/ResetPassword.jsx";
+import AdminDashboard from "./Pages/AdminDashboard.jsx";
+import CustomerDashboard from "./Pages/CustomerDashboard.jsx";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -109,29 +105,42 @@ function App() {
             !isAuthenticated ? (
               <Login onLoginSuccess={handleLoginSuccess} />
             ) : (
-              <Navigate to="/dashboard" replace />
+              <Navigate to={user?.role === 'admin' ? '/dashboard' : '/customer-dashboard'} replace />
             )
           } 
         />
         <Route 
+          path="/reset-password" 
+          element={<ResetPassword />} 
+        />
+        
+        {/* Admin Dashboard */}
+        <Route 
           path="/dashboard" 
           element={
-            isAuthenticated ? (
-              <Dashboard user={user} onLogout={handleLogout} />
+            isAuthenticated && user?.role === 'admin' ? (
+              <AdminDashboard user={user} onLogout={handleLogout} />
+            ) : isAuthenticated ? (
+              <Navigate to="/customer-dashboard" replace />
             ) : (
               <Navigate to="/login" replace />
             )
           } 
         />
         
-        {/* Analytics Routes */}
-        <Route path="/analytics" element={<AnalyticsLayout />}>
-          <Route index element={<AnalyticsDashboard />} />
-          <Route path="sales" element={<SalesAnalytics />} />
-          <Route path="products" element={<ProductPerformance />} />
-          <Route path="inventory" element={<InventoryAnalytics />} />
-          <Route path="customers" element={<CustomerAnalytics />} />
-        </Route>
+        {/* Customer Dashboard */}
+        <Route 
+          path="/customer-dashboard" 
+          element={
+            isAuthenticated && user?.role === 'user' ? (
+              <CustomerDashboard user={user} onLogout={handleLogout} />
+            ) : isAuthenticated ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          } 
+        />
       </Routes>
     </>
   );
