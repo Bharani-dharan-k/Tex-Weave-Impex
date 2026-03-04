@@ -856,14 +856,14 @@
 
 .btn-edit-profile,
 .btn-change-password {
-  flex: 1;
-  padding: 14px;
+  padding: 10px 20px;
   border: none;
-  border-radius: 12px;
-  font-size: 15px;
+  border-radius: 8px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s;
+  max-width: 150px;
 }
 
 .btn-edit-profile {
@@ -1499,13 +1499,14 @@
 .btn-edit-profile,
 .btn-save-profile,
 .btn-cancel-profile {
-  padding: 0.75rem 1.5rem;
+  padding: 0.6rem 1.2rem;
   border-radius: 8px;
   border: none;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  max-width: 150px;
 }
 
 .btn-edit-profile {
