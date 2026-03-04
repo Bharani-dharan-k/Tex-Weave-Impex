@@ -12,12 +12,12 @@ import { protect, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Customer routes
-router.post('/create-razorpay-order', protect, authorize('customer'), createRazorpayOrder);
-router.post('/verify-payment', protect, authorize('customer'), verifyPayment);
-router.get('/my-orders', protect, authorize('customer'), getMyOrders);
+// Customer routes (accessible by 'user' and 'customer' roles)
+router.post('/create-razorpay-order', protect, authorize('user', 'customer'), createRazorpayOrder);
+router.post('/verify-payment', protect, authorize('user', 'customer'), verifyPayment);
+router.get('/my-orders', protect, authorize('user', 'customer'), getMyOrders);
 router.get('/:id', protect, getOrderById);
-router.put('/:id/cancel', protect, authorize('customer'), cancelOrder);
+router.put('/:id/cancel', protect, authorize('user', 'customer'), cancelOrder);
 
 // Admin routes
 router.get('/admin/all', protect, authorize('admin'), getAllOrders);
