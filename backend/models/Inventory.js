@@ -67,7 +67,7 @@ inventorySchema.virtual('daysSinceLastSale').get(function() {
 });
 
 // Indexes for faster queries
-inventorySchema.index({ productId: 1 });
+// Note: productId already has unique: true, which creates an index automatically
 inventorySchema.index({ quantityInStock: 1 });
 inventorySchema.index({ lastSaleDate: -1 });
 

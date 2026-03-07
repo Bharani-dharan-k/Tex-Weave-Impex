@@ -330,3 +330,179 @@ export const updateOrderStatus = async (req, res) => {
     res.status(500).json({ message: 'Failed to update order', error: error.message });
   }
 };
+
+// @desc    Reorder from previous order
+// @route   POST /api/orders/:id/reorder
+// @access  Private (Customer)
+export const reorderOrder = async (req, res) => {
+  try {
+    const order = await Order.findOne({
+      _id: req.params.id,
+      userId: req.user._id
+    }).populate('items.productId');
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    // Check product availability
+    const availableItems = [];
+    const unavailableItems = [];
+
+    for (const item of order.items) {
+      const product = await Product.findById(item.productId._id);
+      
+      if (product && product.isActive && product.stockQuantity >= item.quantity) {
+        availableItems.push({
+          productId: product._id,
+          quantity: item.quantity,
+          product: product
+        });
+      } else {
+        unavailableItems.push({
+          productName: item.productId.name,
+          reason: !product 
+            ? 'Product no longer available' 
+            : !product.isActive 
+            ? 'Product is inactive' 
+            : 'Insufficient stock'
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      availableItems,
+      unavailableItems,
+      message: unavailableItems.length > 0 
+        ? 'Some items are not available for reordering' 
+        : 'All items available for reordering'
+    });
+  } catch (error) {
+    console.error('Reorder error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error processing reorder',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Get order invoice data
+// @route   GET /api/orders/:id/invoice
+// @access  Private (Customer/Admin)
+export const getOrderInvoice = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id)
+      .populate('user', 'name email phone companyName gstNumber')
+      .populate('items.product', 'name productId unit');
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    // Check if user is authorized to view this invoice
+    if (req.user.role !== 'admin' && order.user._id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to view this invoice'
+      });
+    }
+
+    // Calculate invoice details
+    const invoiceData = {
+      orderId: order.orderId,
+      orderDate: order.createdAt,
+      customer: {
+        name: order.user.name,
+        email: order.user.email,
+        phone: order.user.phone,
+        company: order.user.companyName,
+        gstNumber: order.user.gstNumber
+      },
+      billingAddress: order.billingAddress,
+      shippingAddress: order.shippingAddress,
+      items: order.items.map(item => ({
+        productName: item.productName || item.product?.name,
+        productId: item.productId || item.product?.productId,
+        quantity: item.quantity,
+        unit: item.unit || item.product?.unit,
+        unitPrice: item.pricePerUnit,
+        totalPrice: item.totalPrice
+      })),
+      subtotal: order.subtotal,
+      tax: order.tax,
+      shipping: order.shippingCharges,
+      totalAmount: order.totalAmount,
+      paymentStatus: order.paymentStatus,
+      paymentMethod: 'Razorpay',
+      orderStatus: order.orderStatus
+    };
+
+    res.json({
+      success: true,
+      invoice: invoiceData
+    });
+  } catch (error) {
+    console.error('Get invoice error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching invoice',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Get product comparison data
+// @route   POST /api/orders/compare-products
+// @access  Public/Private
+export const compareProducts = async (req, res) => {
+  try {
+    const { productIds } = req.body;
+
+    if (!productIds || productIds.length < 2) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide at least 2 products to compare'
+      });
+    }
+
+    if (productIds.length > 5) {
+      return res.status(400).json({
+        success: false,
+        message: 'Maximum 5 products can be compared at once'
+      });
+    }
+
+    const products = await Product.find({
+      _id: { $in: productIds },
+      isActive: true
+    });
+
+    if (products.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No products found'
+      });
+    }
+
+    res.json({
+      success: true,
+      count: products.length,
+      products
+    });
+  } catch (error) {
+    console.error('Compare products error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error comparing products',
+      error: error.message
+    });
+  }
+};

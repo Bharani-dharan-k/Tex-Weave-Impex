@@ -80,7 +80,7 @@ salesSchema.virtual('profit').get(function() {
 // Indexes for analytics queries
 salesSchema.index({ productId: 1, saleDate: -1 });
 salesSchema.index({ saleDate: -1 });
-salesSchema.index({ invoiceId: 1 });
+// Note: invoiceId already has unique: true, which creates an index automatically
 salesSchema.index({ region: 1, saleDate: -1 });
 
 const Sales = mongoose.model('Sales', salesSchema);

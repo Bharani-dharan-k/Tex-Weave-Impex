@@ -6,7 +6,10 @@ import {
   getOrderById,
   cancelOrder,
   getAllOrders,
-  updateOrderStatus
+  updateOrderStatus,
+  reorderOrder,
+  getOrderInvoice,
+  compareProducts
 } from '../controllers/orderController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
 
@@ -18,6 +21,11 @@ router.post('/verify-payment', protect, authorize('user', 'customer'), verifyPay
 router.get('/my-orders', protect, authorize('user', 'customer'), getMyOrders);
 router.get('/:id', protect, getOrderById);
 router.put('/:id/cancel', protect, authorize('user', 'customer'), cancelOrder);
+router.post('/:id/reorder', protect, authorize('user', 'customer'), reorderOrder);
+router.get('/:id/invoice', protect, getOrderInvoice);
+
+// Product comparison (public or protected)
+router.post('/compare-products', compareProducts);
 
 // Admin routes
 router.get('/admin/all', protect, authorize('admin'), getAllOrders);

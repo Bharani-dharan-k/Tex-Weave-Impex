@@ -18,8 +18,7 @@ import {
   Settings,
   Truck,
   PieChart as PieChartIcon,
-  MessageCircle,
-  Send
+  HelpCircle
 } from 'lucide-react'
 import './AdminDashboard.css'
 import './Dashboard.css'
@@ -102,15 +101,15 @@ const AdminDashboard = ({ user, onLogout }) => {
   const renderContent = () => {
     switch (currentPage) {
       case 'dashboard':
-        return <DashboardHome user={user} />
+        return <DashboardHome user={user} setCurrentPage={setCurrentPage} />
       case 'add-product':
         return <AddProduct />
       case 'products':
         return <ProductManagement />
       case 'users':
         return <UserAnalysis />
-      case 'chat':
-        return <AdminChat />
+      case 'issues':
+        return <IssuesManagement />
       case 'analytics':
         return <AnalyticsSection 
           analyticsTab={analyticsTab}
@@ -201,11 +200,11 @@ const AdminDashboard = ({ user, onLogout }) => {
             </button>
 
             <button
-              className={`sidebar-item ${currentPage === 'chat' ? 'active' : ''}`}
-              onClick={() => setCurrentPage('chat')}
+              className={`sidebar-item ${currentPage === 'issues' ? 'active' : ''}`}
+              onClick={() => setCurrentPage('issues')}
             >
-              <MessageCircle size={20} />
-              {sidebarOpen && <span>Chat</span>}
+              <HelpCircle size={20} />
+              {sidebarOpen && <span>Issues & Support</span>}
             </button>
           </div>
         </aside>
@@ -220,7 +219,7 @@ const AdminDashboard = ({ user, onLogout }) => {
 }
 
 // Dashboard Home Component
-const DashboardHome = ({ user }) => {
+const DashboardHome = ({ user, setCurrentPage }) => {
   const [stats, setStats] = useState({
     totalProducts: 0,
     totalUsers: 0,
@@ -301,17 +300,17 @@ const DashboardHome = ({ user }) => {
       <div className="quick-actions">
         <h3>Quick Actions</h3>
         <div className="action-cards">
-          <div className="action-card">
+          <div className="action-card" onClick={() => setCurrentPage('add-product')} style={{ cursor: 'pointer' }}>
             <PackagePlus size={24} />
             <h4>Add New Product</h4>
             <p>Create a new product listing</p>
           </div>
-          <div className="action-card">
+          <div className="action-card" onClick={() => setCurrentPage('products')} style={{ cursor: 'pointer' }}>
             <Package size={24} />
             <h4>Manage Products</h4>
             <p>View and edit existing products</p>
           </div>
-          <div className="action-card">
+          <div className="action-card" onClick={() => setCurrentPage('users')} style={{ cursor: 'pointer' }}>
             <Users size={24} />
             <h4>User Analysis</h4>
             <p>View user insights and analytics</p>
@@ -916,176 +915,651 @@ const UserAnalysis = () => {
   )
 }
 
-// Admin Chat Component
-const AdminChat = () => {
-  const [customers, setCustomers] = useState([])
-  const [selectedCustomer, setSelectedCustomer] = useState(null)
-  const [messages, setMessages] = useState([])
-  const [newMessage, setNewMessage] = useState('')
+// Issues Management Component
+const IssuesManagement = () => {
+  const [issues, setIssues] = useState([])
   const [loading, setLoading] = useState(true)
+  const [filterStatus, setFilterStatus] = useState('all')
+  const [filterType, setFilterType] = useState('all')
+  const [selectedIssue, setSelectedIssue] = useState(null)
+  const [issueStats, setIssueStats] = useState(null)
+  const [updatingStatus, setUpdatingStatus] = useState(false)
+  const [adminNotes, setAdminNotes] = useState('')
 
   useEffect(() => {
-    fetchCustomers()
-  }, [])
+    fetchIssues()
+    fetchIssueStats()
+  }, [filterStatus, filterType])
 
-  useEffect(() => {
-    if (selectedCustomer) {
-      // Load messages for selected customer
-      loadMessages(selectedCustomer._id)
-    }
-  }, [selectedCustomer])
-
-  const fetchCustomers = async () => {
+  const fetchIssues = async () => {
     try {
       setLoading(true)
-      const response = await axios.get('/api/auth/users')
-      const usersData = response.data || []
-      // Filter only customer users (role !== 'admin')
-      const customerUsers = usersData.filter(u => u.role !== 'admin')
-      setCustomers(customerUsers)
+      const params = new URLSearchParams()
+      if (filterStatus !== 'all') params.append('status', filterStatus)
+      if (filterType !== 'all') params.append('type', filterType)
+      
+      const response = await axios.get(`/api/issues?${params.toString()}`)
+      setIssues(response.data.issues || [])
     } catch (error) {
-      console.error('Error fetching customers:', error)
-      setCustomers([])
+      console.error('Error fetching issues:', error)
+      setIssues([])
     } finally {
       setLoading(false)
     }
   }
 
-  const loadMessages = (customerId) => {
-    // Mock messages - replace with actual API call
-    const mockMessages = [
-      { id: 1, sender: 'customer', text: 'Hello, I need help with my order', timestamp: new Date(Date.now() - 3600000) },
-      { id: 2, sender: 'admin', text: 'Hi! I\'d be happy to help. What\'s your order number?', timestamp: new Date(Date.now() - 3000000) },
-      { id: 3, sender: 'customer', text: 'Order #12345', timestamp: new Date(Date.now() - 2400000) },
-      { id: 4, sender: 'admin', text: 'Let me check that for you...', timestamp: new Date(Date.now() - 1800000) }
-    ]
-    setMessages(mockMessages)
-  }
-
-  const handleSendMessage = (e) => {
-    e.preventDefault()
-    if (!newMessage.trim() || !selectedCustomer) return
-
-    const message = {
-      id: messages.length + 1,
-      sender: 'admin',
-      text: newMessage,
-      timestamp: new Date()
+  const fetchIssueStats = async () => {
+    try {
+      const response = await axios.get('/api/issues/admin/stats')
+      setIssueStats(response.data.stats)
+    } catch (error) {
+      console.error('Error fetching issue stats:', error)
     }
-
-    setMessages([...messages, message])
-    setNewMessage('')
-    
-    // TODO: Send message to backend
   }
 
-  const formatTime = (date) => {
-    return new Date(date).toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+  const handleUpdateStatus = async (issueId, newStatus) => {
+    try {
+      setUpdatingStatus(true)
+      await axios.put(`/api/issues/${issueId}/status`, {
+        status: newStatus,
+        adminNotes: adminNotes
+      })
+      
+      alert('Issue status updated successfully')
+      fetchIssues()
+      fetchIssueStats()
+      setSelectedIssue(null)
+      setAdminNotes('')
+    } catch (error) {
+      console.error('Error updating issue status:', error)
+      alert(error.response?.data?.message || 'Failed to update issue status')
+    } finally {
+      setUpdatingStatus(false)
+    }
+  }
+
+  const handleDeleteIssue = async (issueId) => {
+    if (!window.confirm('Are you sure you want to delete this issue?')) return
+    
+    try {
+      await axios.delete(`/api/issues/${issueId}`)
+      alert('Issue deleted successfully')
+      fetchIssues()
+      fetchIssueStats()
+      setSelectedIssue(null)
+    } catch (error) {
+      console.error('Error deleting issue:', error)
+      alert('Failed to delete issue')
+    }
+  }
+
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     })
   }
 
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'critical': return '#dc3545'
+      case 'high': return '#fd7e14'
+      case 'medium': return '#ffc107'
+      case 'low': return '#28a745'
+      default: return '#6c757d'
+    }
+  }
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'open': return '#007bff'
+      case 'in-progress': return '#ffc107'
+      case 'resolved': return '#28a745'
+      case 'closed': return '#6c757d'
+      default: return '#6c757d'
+    }
+  }
+
   return (
-    <div className="admin-chat-page">
-      <div className="page-header">
-        <h2>Customer Chat</h2>
-        <p>Communicate with your customers</p>
+    <div className="issues-management-page" style={{ padding: '1.5rem' }}>
+      <div className="page-header" style={{ marginBottom: '2rem' }}>
+        <h2 style={{ fontSize: '1.75rem', fontWeight: '600', color: '#2d3748', marginBottom: '0.5rem' }}>
+          Issues & Support Management
+        </h2>
+        <p style={{ color: '#718096', fontSize: '0.95rem' }}>
+          Manage customer issues and support requests
+        </p>
       </div>
 
-      <div className="chat-container">
-        {/* Customer List Sidebar */}
-        <div className="chat-sidebar">
-          <div className="chat-sidebar-header">
-            <h3>Customers ({customers.length})</h3>
-          </div>
-          <div className="customer-list">
-            {loading ? (
-              <div className="empty-state-small">Loading...</div>
-            ) : customers.length === 0 ? (
-              <div className="empty-state-small">
-                <Users size={32} />
-                <p>No customers yet</p>
-              </div>
-            ) : (
-              customers.map((customer) => (
-                <div
-                  key={customer._id || customer.id}
-                  className={`customer-item ${selectedCustomer?._id === customer._id ? 'active' : ''}`}
-                  onClick={() => setSelectedCustomer(customer)}
-                >
-                  <div className="customer-avatar">
-                    {customer.name?.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="customer-info">
-                    <h4>{customer.name}</h4>
-                    <p>{customer.email}</p>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Chat Window */}
-        <div className="chat-window">
-          {selectedCustomer ? (
-            <>
-              <div className="chat-header">
-                <div className="chat-user-info">
-                  <div className="customer-avatar large">
-                    {selectedCustomer.name?.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <h3>{selectedCustomer.name}</h3>
-                    <p className="status-online">Online</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="chat-messages">
-                {messages.length === 0 ? (
-                  <div className="empty-state-small">
-                    <MessageCircle size={48} />
-                    <p>Start a conversation</p>
-                  </div>
-                ) : (
-                  messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`message ${msg.sender === 'admin' ? 'sent' : 'received'}`}
-                    >
-                      <div className="message-content">
-                        <p>{msg.text}</p>
-                        <span className="message-time">{formatTime(msg.timestamp)}</span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              <form className="chat-input-form" onSubmit={handleSendMessage}>
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type your message..."
-                  className="chat-input"
-                />
-                <button type="submit" className="send-button">
-                  <Send size={20} />
-                </button>
-              </form>
-            </>
-          ) : (
-            <div className="empty-state">
-              <MessageCircle size={64} />
-              <h3>Select a Customer</h3>
-              <p>Choose a customer from the list to start chatting</p>
+      {/* Stats Cards */}
+      {issueStats && (
+        <div className="stats-grid" style={{ marginBottom: '2rem' }}>
+          <div className="stat-card">
+            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+              <HelpCircle size={32} />
             </div>
-          )}
+            <div className="stat-info">
+              <h3>Total Issues</h3>
+              <p className="stat-value">{issueStats.total || 0}</p>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
+              <AlertCircle size={32} />
+            </div>
+            <div className="stat-info">
+              <h3>Open Issues</h3>
+              <p className="stat-value">{issueStats.byStatus?.open || 0}</p>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
+              <CheckCircle size={32} />
+            </div>
+            <div className="stat-info">
+              <h3>Resolved</h3>
+              <p className="stat-value">{issueStats.byStatus?.resolved || 0}</p>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
+              <AlertCircle size={32} />
+            </div>
+            <div className="stat-info">
+              <h3>Critical</h3>
+              <p className="stat-value">{issueStats.byPriority?.critical || 0}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Filters */}
+      <div style={{ 
+        background: 'white', 
+        padding: '1.25rem', 
+        borderRadius: '8px', 
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        marginBottom: '1.5rem',
+        display: 'flex',
+        gap: '1.5rem',
+        alignItems: 'flex-end'
+      }}>
+        <div style={{ flex: '0 0 200px' }}>
+          <label style={{ 
+            display: 'block', 
+            marginBottom: '0.5rem', 
+            color: '#4a5568', 
+            fontSize: '0.875rem',
+            fontWeight: '500'
+          }}>
+            STATUS:
+          </label>
+          <select 
+            value={filterStatus} 
+            onChange={(e) => setFilterStatus(e.target.value)}
+            style={{ 
+              width: '100%',
+              padding: '0.625rem 0.75rem', 
+              borderRadius: '6px', 
+              border: '1px solid #e2e8f0',
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              backgroundColor: 'white',
+              transition: 'all 0.2s'
+            }}
+          >
+            <option value="all">All Status</option>
+            <option value="open">Open</option>
+            <option value="in-progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
+
+        <div style={{ flex: '0 0 200px' }}>
+          <label style={{ 
+            display: 'block', 
+            marginBottom: '0.5rem', 
+            color: '#4a5568', 
+            fontSize: '0.875rem',
+            fontWeight: '500'
+          }}>
+            TYPE:
+          </label>
+          <select 
+            value={filterType} 
+            onChange={(e) => setFilterType(e.target.value)}
+            style={{ 
+              width: '100%',
+              padding: '0.625rem 0.75rem', 
+              borderRadius: '6px', 
+              border: '1px solid #e2e8f0',
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              backgroundColor: 'white',
+              transition: 'all 0.2s'
+            }}
+          >
+            <option value="all">All Types</option>
+            <option value="issue">Issue</option>
+            <option value="contact">Contact</option>
+            <option value="feedback">Feedback</option>
+          </select>
         </div>
       </div>
+
+      {/* Issues List */}
+      <div className="issues-list" style={{ 
+        background: 'white', 
+        borderRadius: '8px', 
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        overflow: 'hidden'
+      }}>
+        {loading ? (
+          <div className="loading-state" style={{ padding: '3rem', textAlign: 'center' }}>
+            <div className="spinner"></div>
+            <p style={{ marginTop: '1rem', color: '#718096' }}>Loading issues...</p>
+          </div>
+        ) : issues.length === 0 ? (
+          <div className="empty-state" style={{ padding: '3rem', textAlign: 'center' }}>
+            <HelpCircle size={64} color="#cbd5e0" />
+            <h3 style={{ marginTop: '1rem', fontSize: '1.25rem', color: '#2d3748' }}>No Issues Found</h3>
+            <p style={{ marginTop: '0.5rem', color: '#718096' }}>No support requests or issues to display</p>
+          </div>
+        ) : (
+          <div className="issues-table-container" style={{ overflowX: 'auto' }}>
+            <table style={{ 
+              width: '100%', 
+              borderCollapse: 'collapse',
+              fontSize: '0.875rem'
+            }}>
+              <thead>
+                <tr style={{ backgroundColor: '#f7fafc', borderBottom: '2px solid #e2e8f0' }}>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#4a5568', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ID</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#4a5568', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Type</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#4a5568', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Subject</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#4a5568', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Submitted By</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#4a5568', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Priority</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#4a5568', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#4a5568', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Created</th>
+                  <th style={{ padding: '1rem', textAlign: 'center', fontWeight: '600', color: '#4a5568', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {issues.map((issue) => (
+                  <tr key={issue._id} style={{ borderBottom: '1px solid #e2e8f0', transition: 'background-color 0.2s' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f7fafc'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}>
+                    <td style={{ padding: '1rem', color: '#718096', fontFamily: 'monospace', fontSize: '0.8rem' }}>
+                      #{issue._id.slice(-6)}
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <span style={{ 
+                        backgroundColor: issue.type === 'issue' ? '#3182ce' : 
+                                        issue.type === 'contact' ? '#38a169' : '#718096',
+                        color: 'white',
+                        padding: '0.25rem 0.625rem',
+                        borderRadius: '12px',
+                        fontSize: '0.75rem',
+                        fontWeight: '500',
+                        textTransform: 'capitalize',
+                        display: 'inline-block'
+                      }}>
+                        {issue.type}
+                      </span>
+                    </td>
+                    <td style={{ padding: '1rem', color: '#2d3748', fontWeight: '500', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {issue.subject}
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <div style={{ fontWeight: '500', color: '#2d3748', marginBottom: '0.25rem' }}>
+                        {issue.submittedBy?.name || 'N/A'}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#718096' }}>
+                        {issue.submittedBy?.email || ''}
+                      </div>
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <span style={{ 
+                        color: getPriorityColor(issue.priority),
+                        fontWeight: '600',
+                        textTransform: 'uppercase',
+                        fontSize: '0.75rem',
+                        letterSpacing: '0.05em'
+                      }}>
+                        {issue.priority}
+                      </span>
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <span style={{ 
+                        backgroundColor: getStatusColor(issue.status) + '20',
+                        color: getStatusColor(issue.status),
+                        padding: '0.25rem 0.625rem',
+                        borderRadius: '12px',
+                        fontSize: '0.75rem',
+                        fontWeight: '500',
+                        textTransform: 'capitalize',
+                        display: 'inline-block',
+                        border: `1px solid ${getStatusColor(issue.status)}40`
+                      }}>
+                        {issue.status.replace('-', ' ')}
+                      </span>
+                    </td>
+                    <td style={{ padding: '1rem', color: '#718096', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
+                      {formatDate(issue.createdAt)}
+                    </td>
+                    <td style={{ padding: '1rem', textAlign: 'center' }}>
+                      <button 
+                        onClick={() => setSelectedIssue(issue)}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '0.8rem',
+                          fontWeight: '500',
+                          transition: 'transform 0.2s, box-shadow 0.2s',
+                          boxShadow: '0 2px 4px rgba(102, 126, 234, 0.3)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.transform = 'translateY(-1px)'
+                          e.target.style.boxShadow = '0 4px 8px rgba(102, 126, 234, 0.4)'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.transform = 'translateY(0)'
+                          e.target.style.boxShadow = '0 2px 4px rgba(102, 126, 234, 0.3)'
+                        }}
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Issue Detail Modal */}
+      {selectedIssue && (
+        <div className="modal-overlay" onClick={() => setSelectedIssue(null)} style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '1rem'
+        }}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ 
+            maxWidth: '700px',
+            width: '100%',
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            maxHeight: '90vh',
+            overflow: 'auto'
+          }}>
+            <div className="modal-header" style={{
+              padding: '1.5rem',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <h3 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#2d3748', margin: 0 }}>Issue Details</h3>
+              <button className="modal-close" onClick={() => setSelectedIssue(null)} style={{
+                background: 'none',
+                border: 'none',
+                fontSize: '1.5rem',
+                color: '#718096',
+                cursor: 'pointer',
+                padding: '0.25rem',
+                lineHeight: 1
+              }}>×</button>
+            </div>
+            <div className="modal-body" style={{ padding: '1.5rem' }}>
+              <div style={{ 
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '1.25rem',
+                marginBottom: '1.5rem'
+              }}>
+                <div>
+                  <strong style={{ color: '#4a5568', fontSize: '0.875rem', display: 'block', marginBottom: '0.5rem' }}>ID:</strong>
+                  <span style={{ color: '#2d3748', fontFamily: 'monospace' }}>#{selectedIssue._id}</span>
+                </div>
+                <div>
+                  <strong style={{ color: '#4a5568', fontSize: '0.875rem', display: 'block', marginBottom: '0.5rem' }}>Type:</strong>
+                  <span style={{ 
+                    backgroundColor: selectedIssue.type === 'issue' ? '#3182ce' : 
+                                    selectedIssue.type === 'contact' ? '#38a169' : '#718096',
+                    color: 'white',
+                    padding: '0.25rem 0.625rem',
+                    borderRadius: '12px',
+                    fontSize: '0.75rem',
+                    fontWeight: '500',
+                    textTransform: 'capitalize',
+                    display: 'inline-block'
+                  }}>
+                    {selectedIssue.type}
+                  </span>
+                </div>
+                <div>
+                  <strong style={{ color: '#4a5568', fontSize: '0.875rem', display: 'block', marginBottom: '0.5rem' }}>Category:</strong>
+                  <span style={{ color: '#2d3748', textTransform: 'capitalize' }}>{selectedIssue.category}</span>
+                </div>
+                <div>
+                  <strong style={{ color: '#4a5568', fontSize: '0.875rem', display: 'block', marginBottom: '0.5rem' }}>Priority:</strong>
+                  <span style={{ 
+                    color: getPriorityColor(selectedIssue.priority),
+                    fontWeight: '600',
+                    textTransform: 'uppercase',
+                    fontSize: '0.875rem'
+                  }}>
+                    {selectedIssue.priority}
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '1.5rem' }}>
+                <strong style={{ color: '#4a5568', fontSize: '0.875rem', display: 'block', marginBottom: '0.5rem' }}>Subject:</strong>
+                <p style={{ color: '#2d3748', fontSize: '1rem', fontWeight: '500', margin: 0 }}>{selectedIssue.subject}</p>
+              </div>
+
+              <div style={{ marginBottom: '1.5rem' }}>
+                <strong style={{ color: '#4a5568', fontSize: '0.875rem', display: 'block', marginBottom: '0.5rem' }}>Description:</strong>
+                <p style={{ 
+                  marginTop: '0.5rem', 
+                  padding: '1rem', 
+                  background: '#f7fafc', 
+                  borderRadius: '8px',
+                  color: '#2d3748',
+                  lineHeight: '1.6',
+                  border: '1px solid #e2e8f0',
+                  margin: 0,
+                  whiteSpace: 'pre-wrap'
+                }}>
+                  {selectedIssue.description}
+                </p>
+              </div>
+
+              <div style={{ marginBottom: '1.5rem' }}>
+                <strong style={{ color: '#4a5568', fontSize: '0.875rem', display: 'block', marginBottom: '0.5rem' }}>Submitted By:</strong>
+                <div style={{ color: '#2d3748', fontWeight: '500' }}>{selectedIssue.submittedBy?.name}</div>
+                <div style={{ color: '#718096', fontSize: '0.875rem' }}>{selectedIssue.submittedBy?.email}</div>
+                <div style={{ color: '#a0aec0', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+                  {formatDate(selectedIssue.createdAt)}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '1.5rem' }}>
+                <strong style={{ color: '#4a5568', fontSize: '0.875rem', display: 'block', marginBottom: '0.5rem' }}>Current Status:</strong>
+                <span style={{ 
+                  backgroundColor: getStatusColor(selectedIssue.status) + '20',
+                  color: getStatusColor(selectedIssue.status),
+                  padding: '0.375rem 0.75rem',
+                  borderRadius: '12px',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  textTransform: 'capitalize',
+                  display: 'inline-block',
+                  border: `1px solid ${getStatusColor(selectedIssue.status)}40`
+                }}>
+                  {selectedIssue.status.replace('-', ' ')}
+                </span>
+              </div>
+              
+              {selectedIssue.adminNotes && (
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <strong style={{ color: '#4a5568', fontSize: '0.875rem', display: 'block', marginBottom: '0.5rem' }}>Admin Notes:</strong>
+                  <p style={{ 
+                    marginTop: '0.5rem', 
+                    padding: '1rem', 
+                    background: '#fffbeb', 
+                    borderRadius: '8px',
+                    color: '#78350f',
+                    lineHeight: '1.6',
+                    border: '1px solid #fde68a',
+                    margin: 0
+                  }}>
+                    {selectedIssue.adminNotes}
+                  </p>
+                </div>
+              )}
+
+              <hr style={{ margin: '1.5rem 0', border: 'none', borderTop: '1px solid #e2e8f0' }} />
+
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ 
+                  color: '#4a5568', 
+                  fontSize: '0.875rem', 
+                  fontWeight: '500',
+                  display: 'block',
+                  marginBottom: '0.5rem'
+                }}>
+                  Update Status:
+                </label>
+                <select 
+                  defaultValue={selectedIssue.status}
+                  onChange={(e) => {
+                    if (window.confirm(`Change status to ${e.target.value.replace('-', ' ')}?`)) {
+                      handleUpdateStatus(selectedIssue._id, e.target.value)
+                    }
+                  }}
+                  disabled={updatingStatus}
+                  style={{ 
+                    width: '100%', 
+                    padding: '0.625rem 0.75rem', 
+                    marginTop: '0.25rem',
+                    borderRadius: '6px',
+                    border: '1px solid #e2e8f0',
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                    backgroundColor: 'white'
+                  }}
+                >
+                  <option value="open">Open</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="resolved">Resolved</option>
+                  <option value="closed">Closed</option>
+                </select>
+              </div>
+
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ 
+                  color: '#4a5568', 
+                  fontSize: '0.875rem', 
+                  fontWeight: '500',
+                  display: 'block',
+                  marginBottom: '0.5rem'
+                }}>
+                  Add Admin Notes:
+                </label>
+                <textarea
+                  value={adminNotes}
+                  onChange={(e) => setAdminNotes(e.target.value)}
+                  placeholder="Add notes for this issue..."
+                  rows="4"
+                  style={{ 
+                    width: '100%', 
+                    padding: '0.75rem', 
+                    marginTop: '0.25rem',
+                    borderRadius: '6px',
+                    border: '1px solid #e2e8f0',
+                    fontSize: '0.875rem',
+                    fontFamily: 'inherit',
+                    resize: 'vertical'
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', justifyContent: 'flex-end' }}>
+                <button
+                  onClick={() => setSelectedIssue(null)}
+                  style={{
+                    padding: '0.625rem 1.25rem',
+                    background: '#e2e8f0',
+                    color: '#4a5568',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = '#cbd5e0'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = '#e2e8f0'}
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    if (window.confirm('Are you sure you want to delete this issue?')) {
+                      handleDeleteIssue(selectedIssue._id)
+                    }
+                  }}
+                  style={{
+                    padding: '0.625rem 1.25rem',
+                    background: 'linear-gradient(135deg, #fc8181 0%, #f56565 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    boxShadow: '0 2px 4px rgba(245, 101, 101, 0.3)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'translateY(-1px)'
+                    e.target.style.boxShadow = '0 4px 8px rgba(245, 101, 101, 0.4)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'translateY(0)'
+                    e.target.style.boxShadow = '0 2px 4px rgba(245, 101, 101, 0.3)'
+                  }}
+                >
+                  Delete Issue
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -13,6 +13,11 @@ import profitabilityRoutes from "./routes/profitabilityRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import issueRoutes from "./routes/issueRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
+import wishlistRoutes from "./routes/wishlistRoutes.js";
+import customerAnalyticsRoutes from "./routes/customerAnalyticsRoutes.js";
+import productViewRoutes from "./routes/productViewRoutes.js";
 
 dotenv.config();
 
@@ -38,6 +43,13 @@ app.use("/api/analytics/slow-stock", slowStockRoutes);
 app.use("/api/analytics/forecast", forecastRoutes);
 app.use("/api/analytics/profitability", profitabilityRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/issues", issueRoutes);
+
+// New customer module routes
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/wishlist", wishlistRoutes);
+app.use("/api/customer/analytics", customerAnalyticsRoutes);
+app.use("/api/product-views", productViewRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {
@@ -57,3 +69,4 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
   console.log(`Server running on port ${PORT}`)
 );
+

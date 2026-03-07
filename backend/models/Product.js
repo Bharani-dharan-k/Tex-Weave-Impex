@@ -80,7 +80,7 @@ productSchema.virtual('profitAmount').get(function() {
 
 // Index for faster queries
 productSchema.index({ category: 1, isActive: 1 });
-productSchema.index({ productId: 1 });
+// Note: productId already has unique: true, which creates an index automatically
 
 const Product = mongoose.model('Product', productSchema);
 

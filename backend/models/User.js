@@ -34,6 +34,10 @@ const userSchema = new mongoose.Schema(
       enum: ['admin', 'user', 'customer'],
       default: 'user'
     },
+    profilePicture: {
+      type: String,
+      default: ''
+    },
     // Customer-specific fields
     companyName: {
       type: String,
@@ -80,6 +84,30 @@ const userSchema = new mongoose.Schema(
       gstCertificate: { type: String },
       tradeLicense: { type: String }
     },
+    // Saved addresses for quick checkout
+    savedAddresses: [
+      {
+        label: {
+          type: String,
+          required: true,
+          trim: true
+        },
+        isDefault: {
+          type: Boolean,
+          default: false
+        },
+        street: { type: String, required: true, trim: true },
+        city: { type: String, required: true, trim: true },
+        state: { type: String, required: true, trim: true },
+        country: { type: String, required: true, trim: true, default: 'India' },
+        pincode: { type: String, required: true, trim: true },
+        phone: { type: String, trim: true },
+        createdAt: {
+          type: Date,
+          default: Date.now
+        }
+      }
+    ],
     isVerified: {
       type: Boolean,
       default: false

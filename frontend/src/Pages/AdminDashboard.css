@@ -291,11 +291,23 @@
   transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   border-color: #667eea;
+  background: linear-gradient(135deg, #ffffff 0%, #f7f9ff 100%);
+}
+
+.action-card:active {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .action-card svg {
   color: #667eea;
   margin-bottom: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.action-card:hover svg {
+  transform: scale(1.1);
+  color: #5568d3;
 }
 
 .action-card h4 {

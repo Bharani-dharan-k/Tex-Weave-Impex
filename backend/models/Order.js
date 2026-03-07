@@ -107,7 +107,7 @@ orderSchema.pre('save', async function() {
 
 // Index for faster queries
 orderSchema.index({ user: 1, createdAt: -1 });
-orderSchema.index({ orderId: 1 });
+// Note: orderId already has unique: true, which creates an index automatically
 orderSchema.index({ orderStatus: 1 });
 orderSchema.index({ paymentStatus: 1 });
 

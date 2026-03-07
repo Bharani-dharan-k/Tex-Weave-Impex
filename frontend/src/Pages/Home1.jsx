@@ -309,54 +309,34 @@ function Home1() {
               <h3>Bed Linen</h3>
               <span className="separator-small" />
               <div className="product-category">Business</div>
-              <a href="#" className="product-button">
-                VIEW
-              </a>
+              <Link to="/login" className="product-button">VIEW</Link>
             </div>
           </div>
           <div className="product-card">
-            <img
-              src={bathLinenImg}
-              alt="Bath Linen"
-              className="product-image"
-            />
+            <img src={bathLinenImg} alt="Bath Linen" className="product-image" />
             <div className="product-overlay">
               <h3>Bath Linen</h3>
               <span className="separator-small" />
               <div className="product-category">Business</div>
-              <a href="#" className="product-button">
-                VIEW
-              </a>
+              <Link to="/login" className="product-button">VIEW</Link>
             </div>
           </div>
           <div className="product-card">
-            <img
-              src={kitchenLinenImg}
-              alt="Kitchen Linen"
-              className="product-image"
-            />
+            <img src={kitchenLinenImg} alt="Kitchen Linen" className="product-image" />
             <div className="product-overlay">
               <h3>Kitchen Linen</h3>
               <span className="separator-small" />
               <div className="product-category">Business</div>
-              <a href="#" className="product-button">
-                VIEW
-              </a>
+              <Link to="/login" className="product-button">VIEW</Link>
             </div>
           </div>
           <div className="product-card">
-            <img
-              src={livingImg}
-              alt="Living Linen"
-              className="product-image"
-            />
+            <img src={livingImg} alt="Living Linen" className="product-image" />
             <div className="product-overlay">
               <h3>Living Linen</h3>
               <span className="separator-small" />
               <div className="product-category">Business</div>
-              <a href="#" className="product-button">
-                VIEW
-              </a>
+              <Link to="/login" className="product-button">VIEW</Link>
             </div>
           </div>
           <div className="product-card">
@@ -365,9 +345,7 @@ function Home1() {
               <h3>Table Linen</h3>
               <span className="separator-small" />
               <div className="product-category">Business</div>
-              <a href="#" className="product-button">
-                VIEW
-              </a>
+              <Link to="/login" className="product-button">VIEW</Link>
             </div>
           </div>
           {/* Duplicated set for infinite loop */}
@@ -377,53 +355,34 @@ function Home1() {
               <h3>Bed Linen</h3>
               <span className="separator-small" />
               <div className="product-category">Business</div>
-              <a href="#" className="product-button">
-                VIEW
-              </a>
+              <Link to="/login" className="product-button">VIEW</Link>
             </div>
           </div>
           <div className="product-card">
-            <img
-              src={bathLinenImg}
-              className="product-image"
-            />
+            <img src={bathLinenImg} className="product-image" />
             <div className="product-overlay">
               <h3>Bath Linen</h3>
               <span className="separator-small" />
               <div className="product-category">Business</div>
-              <a href="#" className="product-button">
-                VIEW
-              </a>
+              <Link to="/login" className="product-button">VIEW</Link>
             </div>
           </div>
           <div className="product-card">
-            <img
-              src={kitchenLinenImg}
-              alt="Kitchen Linen"
-              className="product-image"
-            />
+            <img src={kitchenLinenImg} alt="Kitchen Linen" className="product-image" />
             <div className="product-overlay">
               <h3>Kitchen Linen</h3>
               <span className="separator-small" />
               <div className="product-category">Business</div>
-              <a href="#" className="product-button">
-                VIEW
-              </a>
+              <Link to="/login" className="product-button">VIEW</Link>
             </div>
           </div>
           <div className="product-card">
-            <img
-              src={livingImg}
-              alt="Living Linen"
-              className="product-image"
-            />
+            <img src={livingImg} alt="Living Linen" className="product-image" />
             <div className="product-overlay">
               <h3>Living Linen</h3>
               <span className="separator-small" />
               <div className="product-category">Business</div>
-              <a href="#" className="product-button">
-                VIEW
-              </a>
+              <Link to="/login" className="product-button">VIEW</Link>
             </div>
           </div>
           <div className="product-card">
@@ -432,9 +391,7 @@ function Home1() {
               <h3>Table Linen</h3>
               <span className="separator-small" />
               <div className="product-category">Business</div>
-              <a href="#" className="product-button">
-                VIEW
-              </a>
+              <Link to="/login" className="product-button">VIEW</Link>
             </div>
           </div>
         </div>
