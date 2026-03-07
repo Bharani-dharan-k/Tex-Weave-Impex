@@ -8,6 +8,7 @@ import {
   LogOut,
   Menu,
   X,
+  XCircle,
   CheckCircle,
   AlertCircle,
   BarChart3,
@@ -18,7 +19,12 @@ import {
   Settings,
   Truck,
   PieChart as PieChartIcon,
-  HelpCircle
+  HelpCircle,
+  ClipboardList,
+  Clock,
+  ChevronLeft,
+  ChevronRight,
+  Edit2
 } from 'lucide-react'
 import './AdminDashboard.css'
 import './Dashboard.css'
@@ -110,6 +116,8 @@ const AdminDashboard = ({ user, onLogout }) => {
         return <UserAnalysis />
       case 'issues':
         return <IssuesManagement />
+      case 'orders':
+        return <AdminOrders />
       case 'analytics':
         return <AnalyticsSection 
           analyticsTab={analyticsTab}
@@ -205,6 +213,14 @@ const AdminDashboard = ({ user, onLogout }) => {
             >
               <HelpCircle size={20} />
               {sidebarOpen && <span>Issues & Support</span>}
+            </button>
+
+            <button
+              className={`sidebar-item ${currentPage === 'orders' ? 'active' : ''}`}
+              onClick={() => setCurrentPage('orders')}
+            >
+              <ClipboardList size={20} />
+              {sidebarOpen && <span>Orders</span>}
             </button>
           </div>
         </aside>
@@ -2170,6 +2186,431 @@ const AnalyticsSection = ({
       <div className="analytics-content">
         {renderAnalyticsContent()}
       </div>
+    </div>
+  )
+}
+
+// ─── Admin Orders Component ───────────────────────────────────────────────────
+const AdminOrders = () => {
+  const [orders, setOrders] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [filterStatus, setFilterStatus] = useState('all')
+  const [filterPayment, setFilterPayment] = useState('all')
+  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalOrders, setTotalOrders] = useState(0)
+  const [selectedOrder, setSelectedOrder] = useState(null)
+  const [updating, setUpdating] = useState(false)
+  const [newStatus, setNewStatus] = useState('')
+  const [trackingNumber, setTrackingNumber] = useState('')
+  const [estimatedDelivery, setEstimatedDelivery] = useState('')
+
+  useEffect(() => {
+    fetchOrders()
+  }, [filterStatus, filterPayment, page])
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true)
+      const params = new URLSearchParams()
+      if (filterStatus !== 'all') params.append('status', filterStatus)
+      if (filterPayment !== 'all') params.append('paymentStatus', filterPayment)
+      params.append('page', page)
+      params.append('limit', 15)
+      const res = await axios.get(`/api/orders/admin/all?${params.toString()}`)
+      setOrders(res.data.orders || [])
+      setTotalPages(res.data.totalPages || 1)
+      setTotalOrders(res.data.totalOrders || 0)
+    } catch (err) {
+      console.error('Error fetching orders:', err)
+      setOrders([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleUpdateStatus = async () => {
+    if (!selectedOrder || !newStatus) return
+    try {
+      setUpdating(true)
+      const body = { orderStatus: newStatus }
+      if (trackingNumber) body.trackingNumber = trackingNumber
+      if (estimatedDelivery) body.estimatedDelivery = estimatedDelivery
+      await axios.put(`/api/orders/${selectedOrder._id}/status`, body)
+      setSelectedOrder(null)
+      setNewStatus('')
+      setTrackingNumber('')
+      setEstimatedDelivery('')
+      fetchOrders()
+    } catch (err) {
+      console.error('Error updating status:', err)
+      alert(err.response?.data?.message || 'Failed to update order status')
+    } finally {
+      setUpdating(false)
+    }
+  }
+
+  const openModal = (order) => {
+    setSelectedOrder(order)
+    setNewStatus(order.orderStatus)
+    setTrackingNumber(order.trackingNumber || '')
+    setEstimatedDelivery(
+      order.estimatedDelivery ? order.estimatedDelivery.slice(0, 10) : ''
+    )
+  }
+
+  const formatDate = (d) =>
+    new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+
+  const statusColors = {
+    pending:    { bg: '#fff3cd', color: '#856404' },
+    confirmed:  { bg: '#cfe2ff', color: '#084298' },
+    processing: { bg: '#e2d9f3', color: '#432874' },
+    shipped:    { bg: '#d1ecf1', color: '#0c5460' },
+    delivered:  { bg: '#d1e7dd', color: '#0f5132' },
+    cancelled:  { bg: '#f8d7da', color: '#842029' },
+  }
+  const paymentColors = {
+    pending:   { bg: '#fff3cd', color: '#856404' },
+    completed: { bg: '#d1e7dd', color: '#0f5132' },
+    failed:    { bg: '#f8d7da', color: '#842029' },
+    refunded:  { bg: '#e2d9f3', color: '#432874' },
+  }
+
+  const Badge = ({ value, map }) => {
+    const c = map[value] || { bg: '#e2e8f0', color: '#4a5568' }
+    return (
+      <span style={{
+        background: c.bg, color: c.color,
+        padding: '3px 10px', borderRadius: '20px',
+        fontSize: '0.75rem', fontWeight: '600', textTransform: 'capitalize'
+      }}>{value}</span>
+    )
+  }
+
+  const filteredOrders = orders.filter(o => {
+    if (!search.trim()) return true
+    const s = search.toLowerCase()
+    return (
+      (o.orderId || '').toLowerCase().includes(s) ||
+      (o.customerInfo?.name || o.user?.name || '').toLowerCase().includes(s) ||
+      (o.customerInfo?.email || o.user?.email || '').toLowerCase().includes(s)
+    )
+  })
+
+  const thStyle = {
+    padding: '12px 14px', textAlign: 'left', fontWeight: '600',
+    color: '#4a5568', fontSize: '0.72rem', textTransform: 'uppercase',
+    letterSpacing: '0.05em', whiteSpace: 'nowrap'
+  }
+  const tdStyle = {
+    padding: '12px 14px', fontSize: '0.875rem',
+    color: '#2d3748', borderBottom: '1px solid #e2e8f0', verticalAlign: 'middle'
+  }
+
+  return (
+    <div style={{ padding: '1.5rem' }}>
+      {/* Header */}
+      <div style={{ marginBottom: '1.75rem' }}>
+        <h2 style={{ fontSize: '1.75rem', fontWeight: '700', color: '#1a202c', marginBottom: '0.25rem' }}>
+          Orders Management
+        </h2>
+        <p style={{ color: '#718096', fontSize: '0.95rem' }}>
+          {totalOrders} total orders — view, filter, and update order statuses
+        </p>
+      </div>
+
+      {/* Summary KPIs */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: '1rem', marginBottom: '1.75rem' }}>
+        {[
+          { label: 'Total Orders', value: totalOrders,                                          iconEl: <ClipboardList size={22} color="white" />, grad: 'linear-gradient(135deg,#667eea,#764ba2)' },
+          { label: 'Pending',      value: orders.filter(o=>o.orderStatus==='pending').length,   iconEl: <Clock size={22} color="white" />,          grad: 'linear-gradient(135deg,#f6d365,#fda085)' },
+          { label: 'Shipped',      value: orders.filter(o=>o.orderStatus==='shipped').length,   iconEl: <Truck size={22} color="white" />,          grad: 'linear-gradient(135deg,#4facfe,#00f2fe)' },
+          { label: 'Delivered',    value: orders.filter(o=>o.orderStatus==='delivered').length, iconEl: <CheckCircle size={22} color="white" />,    grad: 'linear-gradient(135deg,#43e97b,#38f9d7)' },
+          { label: 'Cancelled',    value: orders.filter(o=>o.orderStatus==='cancelled').length, iconEl: <XCircle size={22} color="white" />,        grad: 'linear-gradient(135deg,#f093fb,#f5576c)' },
+        ].map(k => (
+          <div key={k.label} style={{
+            background: 'white', borderRadius: '10px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            padding: '1.1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '14px'
+          }}>
+            <div style={{
+              width: 44, height: 44, borderRadius: '10px',
+              background: k.grad, display: 'flex', alignItems: 'center',
+              justifyContent: 'center', flexShrink: 0
+            }}>{k.iconEl}</div>
+            <div>
+              <div style={{ fontSize: '1.4rem', fontWeight: '700', color: '#1a202c', lineHeight: 1.1 }}>{k.value}</div>
+              <div style={{ fontSize: '0.72rem', color: '#718096', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{k.label}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <div style={{
+        background: 'white', borderRadius: '10px', boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+        padding: '1rem 1.25rem', marginBottom: '1.25rem',
+        display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end'
+      }}>
+        <div>
+          <label style={{ display: 'block', marginBottom: 5, fontSize: '0.78rem', fontWeight: '600', color: '#4a5568', textTransform: 'uppercase' }}>Search</label>
+          <input
+            type="text" value={search} placeholder="Order ID / Customer..."
+            onChange={e => setSearch(e.target.value)}
+            style={{
+              padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '7px',
+              fontSize: '0.875rem', width: '220px', outline: 'none'
+            }}
+          />
+        </div>
+        <div>
+          <label style={{ display: 'block', marginBottom: 5, fontSize: '0.78rem', fontWeight: '600', color: '#4a5568', textTransform: 'uppercase' }}>Order Status</label>
+          <select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); setPage(1) }}
+            style={{ padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '7px', fontSize: '0.875rem', background: 'white', cursor: 'pointer' }}>
+            <option value="all">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div>
+          <label style={{ display: 'block', marginBottom: 5, fontSize: '0.78rem', fontWeight: '600', color: '#4a5568', textTransform: 'uppercase' }}>Payment Status</label>
+          <select value={filterPayment} onChange={e => { setFilterPayment(e.target.value); setPage(1) }}
+            style={{ padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '7px', fontSize: '0.875rem', background: 'white', cursor: 'pointer' }}>
+            <option value="all">All Payments</option>
+            <option value="pending">Pending</option>
+            <option value="completed">Completed</option>
+            <option value="failed">Failed</option>
+            <option value="refunded">Refunded</option>
+          </select>
+        </div>
+        <button onClick={() => fetchOrders()}
+          style={{
+            padding: '8px 18px', background: 'linear-gradient(135deg,#667eea,#764ba2)',
+            color: 'white', border: 'none', borderRadius: '7px',
+            fontWeight: '600', fontSize: '0.875rem', cursor: 'pointer'
+          }}>Refresh</button>
+      </div>
+
+      {/* Table */}
+      <div style={{ background: 'white', borderRadius: '10px', boxShadow: '0 2px 8px rgba(0,0,0,0.07)', overflow: 'hidden' }}>
+        {loading ? (
+          <div style={{ padding: '3rem', textAlign: 'center', color: '#718096' }}>
+            <div className="spinner" style={{ margin: '0 auto 1rem' }}></div>
+            Loading orders...
+          </div>
+        ) : filteredOrders.length === 0 ? (
+          <div style={{ padding: '3rem', textAlign: 'center' }}>
+            <ClipboardList size={56} color="#cbd5e0" />
+            <h3 style={{ marginTop: '1rem', color: '#2d3748' }}>No Orders Found</h3>
+            <p style={{ color: '#718096' }}>Try adjusting your filters</p>
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: '#f7fafc', borderBottom: '2px solid #e2e8f0' }}>
+                  <th style={thStyle}>Order ID</th>
+                  <th style={thStyle}>Customer</th>
+                  <th style={thStyle}>Date</th>
+                  <th style={thStyle}>Items</th>
+                  <th style={thStyle}>Amount</th>
+                  <th style={thStyle}>Payment</th>
+                  <th style={thStyle}>Order Status</th>
+                  <th style={{ ...thStyle, textAlign: 'center' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredOrders.map(order => (
+                  <tr key={order._id}
+                    onMouseEnter={e => e.currentTarget.style.background = '#f7fafc'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'white'}
+                    style={{ transition: 'background 0.15s', cursor: 'default' }}>
+                    <td style={tdStyle}>
+                      <span style={{ fontFamily: 'monospace', fontWeight: '600', fontSize: '0.8rem', color: '#4a5568' }}>
+                        {order.orderId || order._id.slice(-8).toUpperCase()}
+                      </span>
+                    </td>
+                    <td style={tdStyle}>
+                      <div style={{ fontWeight: '600', color: '#2d3748' }}>
+                        {order.customerInfo?.name || order.user?.name || '—'}
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: '#718096' }}>
+                        {order.customerInfo?.email || order.user?.email || ''}
+                      </div>
+                    </td>
+                    <td style={tdStyle}>{formatDate(order.createdAt)}</td>
+                    <td style={tdStyle}>
+                      <span style={{ fontWeight: '600' }}>{order.items?.length || 0}</span>
+                      <span style={{ color: '#718096', fontSize: '0.8rem' }}> item{order.items?.length !== 1 ? 's' : ''}</span>
+                    </td>
+                    <td style={{ ...tdStyle, fontWeight: '700', color: '#2d3748' }}>
+                      ₹{(order.totalAmount || 0).toLocaleString()}
+                    </td>
+                    <td style={tdStyle}>
+                      <Badge value={order.paymentStatus} map={paymentColors} />
+                    </td>
+                    <td style={tdStyle}>
+                      <Badge value={order.orderStatus} map={statusColors} />
+                    </td>
+                    <td style={{ ...tdStyle, textAlign: 'center' }}>
+                      <button
+                        onClick={() => openModal(order)}
+                        style={{
+                          padding: '6px 14px',
+                          background: 'linear-gradient(135deg,#667eea,#764ba2)',
+                          color: 'white', border: 'none', borderRadius: '6px',
+                          fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer',
+                          display: 'inline-flex', alignItems: 'center', gap: '5px'
+                        }}
+                      ><Edit2 size={13} /> Update</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '1.25rem', alignItems: 'center' }}>
+          <button disabled={page === 1}
+            onClick={() => setPage(p => p - 1)}
+            style={{
+              padding: '7px 16px', borderRadius: '7px', border: '1px solid #e2e8f0',
+              background: page === 1 ? '#f7fafc' : 'white', cursor: page === 1 ? 'not-allowed' : 'pointer',
+              fontWeight: '600', fontSize: '0.875rem', color: page === 1 ? '#a0aec0' : '#2d3748'
+            }}><ChevronLeft size={16} style={{ verticalAlign: 'middle' }} /> Prev</button>
+          <span style={{ fontSize: '0.875rem', color: '#4a5568', fontWeight: '500' }}>
+            Page {page} of {totalPages}
+          </span>
+          <button disabled={page === totalPages}
+            onClick={() => setPage(p => p + 1)}
+            style={{
+              padding: '7px 16px', borderRadius: '7px', border: '1px solid #e2e8f0',
+              background: page === totalPages ? '#f7fafc' : 'white', cursor: page === totalPages ? 'not-allowed' : 'pointer',
+              fontWeight: '600', fontSize: '0.875rem', color: page === totalPages ? '#a0aec0' : '#2d3748'
+            }}>Next <ChevronRight size={16} style={{ verticalAlign: 'middle' }} /></button>
+        </div>
+      )}
+
+      {/* Update Status Modal */}
+      {selectedOrder && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)',
+          zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
+        }} onClick={e => { if (e.target === e.currentTarget) setSelectedOrder(null) }}>
+          <div style={{
+            background: 'white', borderRadius: '14px', width: '100%', maxWidth: '560px',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.25)', overflow: 'hidden'
+          }}>
+            {/* Modal Header */}
+            <div style={{
+              background: 'linear-gradient(135deg,#667eea,#764ba2)',
+              padding: '1.25rem 1.5rem', color: 'white',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+            }}>
+              <div>
+                <h3 style={{ fontWeight: '700', fontSize: '1.1rem', marginBottom: '2px' }}>Update Order Status</h3>
+                <p style={{ fontSize: '0.82rem', opacity: 0.85 }}>
+                  {selectedOrder.orderId || selectedOrder._id.slice(-8).toUpperCase()}
+                </p>
+              </div>
+              <button onClick={() => setSelectedOrder(null)}
+                style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%',
+                  width: 32, height: 32, cursor: 'pointer', color: 'white',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={16} /></button>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ padding: '1.5rem' }}>
+              {/* Order summary */}
+              <div style={{ background: '#f7fafc', borderRadius: '8px', padding: '1rem', marginBottom: '1.25rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.875rem' }}>
+                  <div><span style={{ color: '#718096' }}>Customer: </span><strong>{selectedOrder.customerInfo?.name || selectedOrder.user?.name || '—'}</strong></div>
+                  <div><span style={{ color: '#718096' }}>Amount: </span><strong>₹{(selectedOrder.totalAmount || 0).toLocaleString()}</strong></div>
+                  <div><span style={{ color: '#718096' }}>Items: </span><strong>{selectedOrder.items?.length}</strong></div>
+                  <div><span style={{ color: '#718096' }}>Payment: </span><Badge value={selectedOrder.paymentStatus} map={paymentColors} /></div>
+                </div>
+                {selectedOrder.items?.length > 0 && (
+                  <div style={{ marginTop: '10px', borderTop: '1px solid #e2e8f0', paddingTop: '10px' }}>
+                    {selectedOrder.items.slice(0, 3).map((item, i) => (
+                      <div key={i} style={{ fontSize: '0.8rem', color: '#4a5568', marginBottom: '3px' }}>
+                        • {item.productName || item.product?.productName || 'Product'} × {item.quantity} {item.unit || ''}
+                      </div>
+                    ))}
+                    {selectedOrder.items.length > 3 && <div style={{ fontSize: '0.78rem', color: '#718096' }}>+{selectedOrder.items.length - 3} more items</div>}
+                  </div>
+                )}
+              </div>
+
+              {/* Status select */}
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', marginBottom: 6, fontWeight: '600', fontSize: '0.85rem', color: '#2d3748' }}>New Order Status *</label>
+                <select value={newStatus} onChange={e => setNewStatus(e.target.value)}
+                  style={{
+                    width: '100%', padding: '10px 12px', border: '1.5px solid #e2e8f0',
+                    borderRadius: '8px', fontSize: '0.9rem', background: 'white', cursor: 'pointer'
+                  }}>
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="processing">Processing</option>
+                  <option value="shipped">Shipped</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+
+              {/* Tracking */}
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', marginBottom: 6, fontWeight: '600', fontSize: '0.85rem', color: '#2d3748' }}>Tracking Number <span style={{ fontWeight: 400, color: '#718096' }}>(optional)</span></label>
+                <input type="text" value={trackingNumber} placeholder="e.g. DTDC1234567890"
+                  onChange={e => setTrackingNumber(e.target.value)}
+                  style={{
+                    width: '100%', padding: '10px 12px', border: '1.5px solid #e2e8f0',
+                    borderRadius: '8px', fontSize: '0.9rem', boxSizing: 'border-box'
+                  }} />
+              </div>
+
+              {/* Estimated delivery */}
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', marginBottom: 6, fontWeight: '600', fontSize: '0.85rem', color: '#2d3748' }}>Estimated Delivery <span style={{ fontWeight: 400, color: '#718096' }}>(optional)</span></label>
+                <input type="date" value={estimatedDelivery}
+                  onChange={e => setEstimatedDelivery(e.target.value)}
+                  style={{
+                    width: '100%', padding: '10px 12px', border: '1.5px solid #e2e8f0',
+                    borderRadius: '8px', fontSize: '0.9rem', boxSizing: 'border-box'
+                  }} />
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                <button onClick={() => setSelectedOrder(null)}
+                  style={{
+                    padding: '9px 22px', border: '1.5px solid #e2e8f0', borderRadius: '8px',
+                    background: 'white', cursor: 'pointer', fontWeight: '600', fontSize: '0.9rem', color: '#4a5568'
+                  }}>Cancel</button>
+                <button onClick={handleUpdateStatus} disabled={updating}
+                  style={{
+                    padding: '9px 22px',
+                    background: updating ? '#a0aec0' : 'linear-gradient(135deg,#667eea,#764ba2)',
+                    color: 'white', border: 'none', borderRadius: '8px',
+                    fontWeight: '600', fontSize: '0.9rem', cursor: updating ? 'not-allowed' : 'pointer'
+                  }}>
+                  {updating ? 'Saving...' : 'Save Status'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -2114,29 +2114,51 @@ const CustomerDashboard = ({ user, onLogout }) => {
         </div>
 
         {/* Monthly Spending Bar Chart */}
-        {Array.isArray(spendingData) && spendingData.length > 0 && (
-          <div className="enh-section-card">
-            <h3>Monthly Spending</h3>
-            <div className="enh-bar-chart">
-              {spendingData.slice(-8).map((item, idx) => {
-                const max = Math.max(...spendingData.map(d => d.totalSpending || d.totalSpent || d.amount || 0), 1)
-                const value = item.totalSpending || item.totalSpent || item.amount || 0
-                const heightPct = Math.max((value / max) * 160, value > 0 ? 6 : 2)
-                const monthNum = item._id?.month
-                const label = monthNum
-                  ? new Date(2000, monthNum - 1).toLocaleString('default', { month: 'short' })
-                  : (item.month || item.period || `M${idx + 1}`)
-                return (
-                  <div key={idx} className="enh-bar-col">
-                    <div className="enh-bar-tooltip">₹{value.toLocaleString()}<br/><small>{label} {item._id?.year || ''}</small></div>
-                    <div className="enh-bar" style={{ height: `${heightPct}px` }}></div>
-                    <span className="enh-bar-label">{label}</span>
+        {Array.isArray(spendingData) && spendingData.length > 0 && (() => {
+          const max = Math.max(...spendingData.map(d => d.totalSpending || d.totalSpent || d.amount || 0), 1)
+          const CHART_H = 200
+          const yTicks = [max, max * 0.75, max * 0.5, max * 0.25, 0]
+          const fmtTick = v => v >= 1000 ? `₹${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k` : `₹${Math.round(v)}`
+          return (
+            <div className="enh-section-card">
+              <div className="enh-chart-header">
+                <h3>Monthly Spending</h3>
+                <span className="enh-chart-subtitle">Last {spendingData.slice(-8).length} months</span>
+              </div>
+              <div className="enh-chart-container">
+                {/* Y-axis rotated label */}
+                <div className="enh-y-axis-label">Amount (₹)</div>
+                {/* Y-axis tick values */}
+                <div className="enh-y-axis">
+                  {yTicks.map((tick, i) => (
+                    <span key={i} className="enh-y-tick">{fmtTick(tick)}</span>
+                  ))}
+                </div>
+                {/* Chart plot area */}
+                <div className="enh-chart-area">
+                  <div className="enh-bar-chart">
+                    {spendingData.slice(-8).map((item, idx) => {
+                      const value = item.totalSpending || item.totalSpent || item.amount || 0
+                      const heightPct = Math.max((value / max) * CHART_H, value > 0 ? 6 : 2)
+                      const monthNum = item._id?.month
+                      const label = monthNum
+                        ? new Date(2000, monthNum - 1).toLocaleString('default', { month: 'short' })
+                        : (item.month || item.period || `M${idx + 1}`)
+                      return (
+                        <div key={idx} className="enh-bar-col">
+                          <div className="enh-bar-tooltip">₹{value.toLocaleString()}<br/><small>{label} {item._id?.year || ''}</small></div>
+                          <div className="enh-bar" style={{ height: `${heightPct}px` }}></div>
+                          <span className="enh-bar-label">{label}</span>
+                        </div>
+                      )
+                    })}
                   </div>
-                )
-              })}
+                  <div className="enh-x-axis-label">Month</div>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          )
+        })()}
 
         <div className="enh-two-col">
           {/* Top Categories */}
