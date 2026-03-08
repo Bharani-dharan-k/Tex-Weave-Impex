@@ -1,6 +1,9 @@
 import express from 'express'
 import { body, validationResult } from 'express-validator'
 import User from '../models/User.js'
+import Order from '../models/Order.js'
+import Review from '../models/Review.js'
+import Issue from '../models/Issue.js'
 import jwt from 'jsonwebtoken'
 import { protect } from '../middleware/authMiddleware.js'
 import { sendPasswordResetEmail } from '../config/email.js'
@@ -277,6 +280,35 @@ router.get('/users', protect, async (req, res) => {
     res.json(users)
   } catch (error) {
     console.error('Error fetching users:', error)
+    res.status(500).json({ message: 'Server error' })
+  }
+})
+
+// @route   GET /api/auth/users/:userId/details
+// @desc    Get a specific user's profile + orders + reviews + issues (Admin only)
+// @access  Private/Admin
+router.get('/users/:userId/details', protect, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Not authorized as admin' })
+    }
+
+    const { userId } = req.params
+
+    const [user, orders, reviews, issues] = await Promise.all([
+      User.findById(userId).select('-password'),
+      Order.find({ user: userId }).sort({ createdAt: -1 }),
+      Review.find({ userId }).populate('productId', 'name productId').sort({ createdAt: -1 }),
+      Issue.find({ 'submittedBy.userId': userId }).sort({ createdAt: -1 })
+    ])
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    res.json({ user, orders, reviews, issues })
+  } catch (error) {
+    console.error('Error fetching user details:', error)
     res.status(500).json({ message: 'Server error' })
   }
 })

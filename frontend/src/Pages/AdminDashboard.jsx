@@ -61,6 +61,7 @@ const AdminDashboard = ({ user, onLogout }) => {
   const [currentPage, setCurrentPage] = useState('dashboard')
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [analyticsTab, setAnalyticsTab] = useState('overview')
+  const [selectedUserId, setSelectedUserId] = useState(null)
 
   // Analytics data state
   const [kpiData, setKpiData] = useState(null)
@@ -113,7 +114,9 @@ const AdminDashboard = ({ user, onLogout }) => {
       case 'products':
         return <ProductManagement />
       case 'users':
-        return <UserAnalysis />
+        return <UserAnalysis onSelectUser={(id) => { setSelectedUserId(id); setCurrentPage('user-detail') }} />
+      case 'user-detail':
+        return <UserDetail userId={selectedUserId} onBack={() => setCurrentPage('users')} />
       case 'issues':
         return <IssuesManagement />
       case 'orders':
@@ -814,7 +817,7 @@ const ProductManagement = () => {
 }
 
 // User Analysis Component
-const UserAnalysis = () => {
+const UserAnalysis = ({ onSelectUser }) => {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
@@ -909,17 +912,33 @@ const UserAnalysis = () => {
                 <th>Role</th>
                 <th>Join Date</th>
                 <th>Status</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {users.map((user) => (
-                <tr key={user._id || user.id}>
-                  <td>{user.name}</td>
+                <tr
+                  key={user._id || user.id}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => onSelectUser && onSelectUser(user._id || user.id)}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f4ff'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
+                >
+                  <td style={{ fontWeight: '500', color: '#667eea' }}>{user.name}</td>
                   <td>{user.email}</td>
                   <td><span className={`status-badge ${user.role === 'admin' ? 'active' : ''}`}>{user.role}</span></td>
                   <td>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</td>
                   <td>
                     <span className="status-badge active">Active</span>
+                  </td>
+                  <td>
+                    <button
+                      className="btn-action"
+                      onClick={(e) => { e.stopPropagation(); onSelectUser && onSelectUser(user._id || user.id) }}
+                      style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', border: 'none', borderRadius: '6px', padding: '0.4rem 0.9rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '500' }}
+                    >
+                      View Profile
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -927,6 +946,218 @@ const UserAnalysis = () => {
           </table>
         )}
       </div>
+    </div>
+  )
+}
+
+// User Detail Component
+const UserDetail = ({ userId, onBack }) => {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState('orders')
+
+  useEffect(() => {
+    if (!userId) return
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        const res = await axios.get(`/api/auth/users/${userId}/details`)
+        setData(res.data)
+      } catch (err) {
+        console.error('Error fetching user details:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [userId])
+
+  if (loading) return <div style={{ padding: '3rem', textAlign: 'center', color: '#718096' }}>Loading user profile...</div>
+  if (!data) return <div style={{ padding: '3rem', textAlign: 'center', color: '#e53e3e' }}>Failed to load user profile.</div>
+
+  const { user, orders, reviews, issues } = data
+
+  const tabStyle = (tab) => ({
+    padding: '0.625rem 1.25rem',
+    border: 'none',
+    background: activeTab === tab ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : '#f7fafc',
+    color: activeTab === tab ? 'white' : '#4a5568',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    fontSize: '0.875rem',
+    fontWeight: '500',
+    transition: 'all 0.2s'
+  })
+
+  const statusBadge = (label, color) => (
+    <span style={{
+      background: color + '20',
+      color,
+      border: `1px solid ${color}40`,
+      borderRadius: '12px',
+      padding: '0.2rem 0.6rem',
+      fontSize: '0.75rem',
+      fontWeight: '500',
+      textTransform: 'capitalize'
+    }}>{label}</span>
+  )
+
+  const orderStatusColor = { pending: '#d69e2e', confirmed: '#3182ce', processing: '#805ad5', shipped: '#2b6cb0', delivered: '#38a169', cancelled: '#e53e3e' }
+  const issueStatusColor = { open: '#3182ce', 'in-progress': '#d69e2e', resolved: '#38a169', closed: '#718096' }
+
+  return (
+    <div style={{ padding: '1.5rem' }}>
+      {/* Back button */}
+      <button
+        onClick={onBack}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#667eea', fontSize: '0.95rem', fontWeight: '500', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: 0 }}
+      >
+        ← Back to User List
+      </button>
+
+      {/* User profile card */}
+      <div style={{ background: 'white', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.75rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+        <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', color: 'white', fontWeight: '700', flexShrink: 0 }}>
+          {user.name?.charAt(0).toUpperCase()}
+        </div>
+        <div>
+          <h2 style={{ margin: '0 0 0.25rem', fontSize: '1.5rem', fontWeight: '700', color: '#2d3748' }}>{user.name}</h2>
+          <p style={{ margin: '0 0 0.5rem', color: '#718096', fontSize: '0.95rem' }}>{user.email}</p>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.8rem', color: '#a0aec0' }}>Role: <strong style={{ color: '#4a5568' }}>{user.role}</strong></span>
+            <span style={{ fontSize: '0.8rem', color: '#a0aec0' }}>Joined: <strong style={{ color: '#4a5568' }}>{user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}</strong></span>
+          </div>
+        </div>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: '1.5rem', textAlign: 'center', flexShrink: 0 }}>
+          {[['Orders', orders.length, '#667eea'], ['Reviews', reviews.length, '#f093fb'], ['Reports', issues.length, '#f97316']].map(([label, count, color]) => (
+            <div key={label}>
+              <div style={{ fontSize: '1.75rem', fontWeight: '700', color }}>{count}</div>
+              <div style={{ fontSize: '0.8rem', color: '#718096' }}>{label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+        {[['orders', `Orders (${orders.length})`], ['reviews', `Reviews (${reviews.length})`], ['reports', `Reports & Issues (${issues.length})`]].map(([key, label]) => (
+          <button key={key} style={tabStyle(key)} onClick={() => setActiveTab(key)}>{label}</button>
+        ))}
+      </div>
+
+      {/* Orders Tab */}
+      {activeTab === 'orders' && (
+        <div style={{ background: 'white', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+          {orders.length === 0 ? (
+            <div style={{ padding: '3rem', textAlign: 'center', color: '#a0aec0' }}>
+              <ShoppingCart size={48} style={{ opacity: 0.4 }} />
+              <p style={{ marginTop: '1rem' }}>No orders found for this user.</p>
+            </div>
+          ) : (
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+              <thead>
+                <tr style={{ background: '#f7fafc', borderBottom: '2px solid #e2e8f0' }}>
+                  {['Order ID', 'Items', 'Total Amount', 'Payment', 'Status', 'Date'].map(h => (
+                    <th key={h} style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#4a5568', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {orders.map(order => (
+                  <tr key={order._id} style={{ borderBottom: '1px solid #e2e8f0' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#f7fafc'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'white'}>
+                    <td style={{ padding: '0.9rem 1rem', fontFamily: 'monospace', color: '#667eea', fontWeight: '600' }}>{order.orderId || '#' + order._id.slice(-6)}</td>
+                    <td style={{ padding: '0.9rem 1rem', color: '#4a5568' }}>{order.items?.length || 0} item(s)</td>
+                    <td style={{ padding: '0.9rem 1rem', fontWeight: '600', color: '#2d3748' }}>₹{(order.totalAmount || 0).toLocaleString('en-IN')}</td>
+                    <td style={{ padding: '0.9rem 1rem' }}>{statusBadge(order.paymentStatus, order.paymentStatus === 'completed' ? '#38a169' : order.paymentStatus === 'failed' ? '#e53e3e' : '#d69e2e')}</td>
+                    <td style={{ padding: '0.9rem 1rem' }}>{statusBadge(order.orderStatus, orderStatusColor[order.orderStatus] || '#718096')}</td>
+                    <td style={{ padding: '0.9rem 1rem', color: '#718096', fontSize: '0.8rem' }}>{order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN') : 'N/A'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+
+      {/* Reviews Tab */}
+      {activeTab === 'reviews' && (
+        <div style={{ background: 'white', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+          {reviews.length === 0 ? (
+            <div style={{ padding: '3rem', textAlign: 'center', color: '#a0aec0' }}>
+              <TrendingUp size={48} style={{ opacity: 0.4 }} />
+              <p style={{ marginTop: '1rem' }}>No reviews submitted by this user.</p>
+            </div>
+          ) : (
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+              <thead>
+                <tr style={{ background: '#f7fafc', borderBottom: '2px solid #e2e8f0' }}>
+                  {['Product', 'Rating', 'Title', 'Review', 'Status', 'Date'].map(h => (
+                    <th key={h} style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#4a5568', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {reviews.map(review => (
+                  <tr key={review._id} style={{ borderBottom: '1px solid #e2e8f0' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#f7fafc'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'white'}>
+                    <td style={{ padding: '0.9rem 1rem', color: '#4a5568', fontWeight: '500' }}>{review.productId?.name || 'N/A'}</td>
+                    <td style={{ padding: '0.9rem 1rem' }}>
+                      <span style={{ color: '#d69e2e', fontWeight: '700', fontSize: '1rem' }}>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span>
+                      <span style={{ color: '#718096', fontSize: '0.8rem', marginLeft: '0.35rem' }}>({review.rating}/5)</span>
+                    </td>
+                    <td style={{ padding: '0.9rem 1rem', fontWeight: '500', color: '#2d3748' }}>{review.reviewTitle || '—'}</td>
+                    <td style={{ padding: '0.9rem 1rem', color: '#718096', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{review.reviewText}</td>
+                    <td style={{ padding: '0.9rem 1rem' }}>{statusBadge(review.status, review.status === 'approved' ? '#38a169' : review.status === 'rejected' ? '#e53e3e' : '#d69e2e')}</td>
+                    <td style={{ padding: '0.9rem 1rem', color: '#718096', fontSize: '0.8rem' }}>{review.createdAt ? new Date(review.createdAt).toLocaleDateString('en-IN') : 'N/A'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+
+      {/* Reports / Issues Tab */}
+      {activeTab === 'reports' && (
+        <div style={{ background: 'white', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+          {issues.length === 0 ? (
+            <div style={{ padding: '3rem', textAlign: 'center', color: '#a0aec0' }}>
+              <HelpCircle size={48} style={{ opacity: 0.4 }} />
+              <p style={{ marginTop: '1rem' }}>No issues or reports submitted by this user.</p>
+            </div>
+          ) : (
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+              <thead>
+                <tr style={{ background: '#f7fafc', borderBottom: '2px solid #e2e8f0' }}>
+                  {['Type', 'Subject', 'Priority', 'Status', 'Date'].map(h => (
+                    <th key={h} style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#4a5568', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {issues.map(issue => (
+                  <tr key={issue._id} style={{ borderBottom: '1px solid #e2e8f0' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#f7fafc'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'white'}>
+                    <td style={{ padding: '0.9rem 1rem' }}>
+                      <span style={{ background: issue.type === 'issue' ? '#3182ce' : issue.type === 'contact' ? '#38a169' : '#718096', color: 'white', borderRadius: '12px', padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: '500', textTransform: 'capitalize' }}>{issue.type}</span>
+                    </td>
+                    <td style={{ padding: '0.9rem 1rem', color: '#2d3748', fontWeight: '500', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{issue.subject}</td>
+                    <td style={{ padding: '0.9rem 1rem' }}>
+                      <span style={{ color: issue.priority === 'critical' ? '#e53e3e' : issue.priority === 'high' ? '#dd6b20' : issue.priority === 'medium' ? '#d69e2e' : '#38a169', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{issue.priority}</span>
+                    </td>
+                    <td style={{ padding: '0.9rem 1rem' }}>{statusBadge(issue.status.replace('-', ' '), issueStatusColor[issue.status] || '#718096')}</td>
+                    <td style={{ padding: '0.9rem 1rem', color: '#718096', fontSize: '0.8rem' }}>{issue.createdAt ? new Date(issue.createdAt).toLocaleDateString('en-IN') : 'N/A'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
     </div>
   )
 }
