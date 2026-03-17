@@ -1,7 +1,7 @@
 import { AreaChart as RechartsAreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { formatCurrency, formatNumber } from '../services/dataService';
 
-const AreaChart = ({ data, xKey, yKeys, colors, title, valuePrefix, height = 300 }) => {
+const AreaChart = ({ data, xKey, yKeys, colors, title, valuePrefix, height = 300, onChartClick }) => {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
@@ -18,11 +18,31 @@ const AreaChart = ({ data, xKey, yKeys, colors, title, valuePrefix, height = 300
     return null;
   };
 
+  if (!data || data.length === 0) {
+    return (
+      <div className="chart-container">
+        {title && <h3 className="chart-title">{title}</h3>}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: height, color: '#a0aec0', flexDirection: 'column', gap: 8 }}>
+          <span style={{ fontSize: '2rem' }}>📉</span>
+          <span style={{ fontSize: '0.9rem' }}>No data available yet</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="chart-container">
       {title && <h3 className="chart-title">{title}</h3>}
       <ResponsiveContainer width="100%" height={height}>
-        <RechartsAreaChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+        <RechartsAreaChart
+          data={data}
+          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+          onClick={() => {
+            if (onChartClick) {
+              onChartClick()
+            }
+          }}
+        >
           <defs>
             {yKeys.map((key, index) => (
               <linearGradient key={key.dataKey} id={`color${key.dataKey}`} x1="0" y1="0" x2="0" y2="1">

@@ -20,9 +20,10 @@ const CustomerAnalytics = () => {
     const domestic = regional.filter(r => r.region.includes('Domestic')).reduce((sum, r) => sum + r.revenue, 0);
     const exportRevenue = regional.filter(r => r.region.includes('Export')).reduce((sum, r) => sum + r.revenue, 0);
     
+    const totalRevenue = domestic + exportRevenue;
     setDomesticVsExport([
-      { region: 'Domestic', revenue: domestic, percentage: Math.round(domestic / (domestic + exportRevenue) * 100) },
-      { region: 'Export', revenue: exportRevenue, percentage: Math.round(exportRevenue / (domestic + exportRevenue) * 100) }
+      { region: 'Domestic', revenue: domestic, percentage: totalRevenue > 0 ? Math.round((domestic / totalRevenue) * 100) : 0 },
+      { region: 'Export', revenue: exportRevenue, percentage: totalRevenue > 0 ? Math.round((exportRevenue / totalRevenue) * 100) : 0 }
     ]);
   }, []);
 

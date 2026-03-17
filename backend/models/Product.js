@@ -58,6 +58,12 @@ const productSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true
+    },
+    source: {
+      type: String,
+      enum: ['manual', 'csv_upload'],
+      set: (value) => (value === 'google_sheets' ? 'csv_upload' : value),
+      default: 'manual'
     }
   },
   {

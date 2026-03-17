@@ -1,0 +1,178 @@
+invoiceId,productId,productName,quantitySold,unitPrice,totalAmount,costPrice,saleDate,customerName,region,paymentStatus,salesPerson
+INV0001,PROD001,Premium Cotton Poplin,120,780,93600,520,2025-01-05,Sharma Textiles,North,Paid,Rahul Sharma
+INV0002,PROD003,Cotton Cambric,200,580,116000,380,2025-01-07,Gupta Fabrics,South,Paid,Priya Patel
+INV0003,PROD006,Cotton Denim 12oz,150,850,127500,550,2025-01-10,Patel Enterprises,West,Paid,Amit Kumar
+INV0004,PROD009,Polyester Satin,80,700,56000,450,2025-01-12,Mehta Clothings,Central,Paid,Sneha Reddy
+INV0005,PROD014,Silk Dupioni,25,2100,52500,1400,2025-01-14,Jain Silks,South,Paid,Vikram Singh
+INV0006,PROD028,Poly-Cotton Blend 65/35,300,540,162000,350,2025-01-16,Agarwal Trading,North,Paid,Rahul Sharma
+INV0007,PROD019,Wool Tweed,40,1300,52000,850,2025-01-18,Rajesh Garments,East,Paid,Priya Patel
+INV0008,PROD024,Linen Plain Weave,90,980,88200,650,2025-01-20,Kumar Exports,South,Paid,Amit Kumar
+INV0009,PROD035,Jute Burlap,500,300,150000,180,2025-01-22,Singh Fabrics,North,Paid,Sneha Reddy
+INV0010,PROD042,Silk Brocade,15,2700,40500,1800,2025-01-25,Verma Fashion House,Central,Paid,Vikram Singh
+INV0011,PROD002,Cotton Canvas Heavy,100,920,92000,600,2025-01-28,Kapoor Textiles,West,Paid,Rahul Sharma
+INV0012,PROD008,Polyester Crepe,130,560,72800,360,2025-02-01,Malhotra & Sons,North,Paid,Priya Patel
+INV0013,PROD010,Polyester Chiffon,160,480,76800,300,2025-02-03,Bajaj Fabrics,South,Paid,Amit Kumar
+INV0014,PROD015,Silk Charmeuse,30,1850,55500,1200,2025-02-05,Jain Silks,South,Pending,Sneha Reddy
+INV0015,PROD020,Wool Flannel,50,1200,60000,780,2025-02-07,Tiwari Enterprises,East,Paid,Vikram Singh
+INV0016,PROD033,Terry Cotton Towelling,180,680,122400,440,2025-02-10,Nair Textiles,South,Paid,Rahul Sharma
+INV0017,PROD038,Muslin Cotton,250,420,105000,260,2025-02-12,Reddy Garments,South,Paid,Priya Patel
+INV0018,PROD047,Polyester Microfiber,220,400,88000,250,2025-02-14,Khan Textiles,Central,Paid,Amit Kumar
+INV0019,PROD001,Premium Cotton Poplin,140,780,109200,520,2025-02-16,Das Fabrics,East,Paid,Sneha Reddy
+INV0020,PROD005,Cotton Twill Drill,110,740,81400,480,2025-02-18,Choudhary Trading,North,Paid,Vikram Singh
+INV0021,PROD011,Polyester Taffeta,100,500,50000,320,2025-02-20,Iyer Silks,South,Paid,Rahul Sharma
+INV0022,PROD025,Linen Chambray,70,880,61600,580,2025-02-22,Sharma Textiles,North,Paid,Priya Patel
+INV0023,PROD029,Poly-Viscose Suiting,90,740,66600,480,2025-02-25,Gupta Fabrics,South,Paid,Amit Kumar
+INV0024,PROD034,Bamboo Rayon,85,650,55250,420,2025-02-27,Patel Enterprises,West,Paid,Sneha Reddy
+INV0025,PROD039,Lycra Spandex,60,780,46800,500,2025-03-01,Mehta Clothings,Central,Paid,Vikram Singh
+INV0026,PROD044,Cotton Sateen,95,710,67450,460,2025-03-03,Agarwal Trading,North,Paid,Rahul Sharma
+INV0027,PROD004,Cotton Voile,170,520,88400,340,2025-03-05,Rajesh Garments,East,Paid,Priya Patel
+INV0028,PROD007,Cotton Flannel,80,650,52000,420,2025-03-07,Kumar Exports,South,Pending,Amit Kumar
+INV0029,PROD012,Polyester Mesh,110,440,48400,280,2025-03-10,Singh Fabrics,North,Paid,Sneha Reddy
+INV0030,PROD016,Silk Organza,20,1700,34000,1100,2025-03-12,Verma Fashion House,Central,Paid,Vikram Singh
+INV0031,PROD022,Wool Cashmere Blend,18,2400,43200,1600,2025-03-14,Kapoor Textiles,West,Paid,Rahul Sharma
+INV0032,PROD026,Linen Canvas,55,1050,57750,700,2025-03-16,Malhotra & Sons,North,Paid,Priya Patel
+INV0033,PROD030,Cotton-Linen Blend,75,770,57750,500,2025-03-18,Bajaj Fabrics,South,Paid,Amit Kumar
+INV0034,PROD036,Nylon Ripstop,65,590,38350,380,2025-03-20,Jain Silks,South,Paid,Sneha Reddy
+INV0035,PROD040,Viscose Rayon,140,530,74200,340,2025-03-22,Tiwari Enterprises,East,Paid,Vikram Singh
+INV0036,PROD045,Hemp Fabric,50,850,42500,550,2025-03-25,Nair Textiles,South,Paid,Rahul Sharma
+INV0037,PROD049,Cotton Interlock Knit,120,590,70800,380,2025-03-27,Reddy Garments,South,Paid,Priya Patel
+INV0038,PROD006,Cotton Denim 12oz,180,850,153000,550,2025-03-30,Khan Textiles,Central,Paid,Amit Kumar
+INV0039,PROD013,Polyester Fleece,90,620,55800,400,2025-04-02,Das Fabrics,East,Paid,Sneha Reddy
+INV0040,PROD017,Silk Crepe de Chine,22,2000,44000,1300,2025-04-04,Choudhary Trading,North,Paid,Vikram Singh
+INV0041,PROD021,Merino Wool Jersey,35,1450,50750,950,2025-04-07,Iyer Silks,South,Paid,Rahul Sharma
+INV0042,PROD027,Linen Slub,65,950,61750,620,2025-04-09,Sharma Textiles,North,Paid,Priya Patel
+INV0043,PROD031,Silk-Cotton Blend,40,1150,46000,750,2025-04-11,Gupta Fabrics,South,Pending,Amit Kumar
+INV0044,PROD037,Velvet Polyester,30,1080,32400,700,2025-04-14,Patel Enterprises,West,Paid,Sneha Reddy
+INV0045,PROD041,Corduroy Cotton,70,740,51800,480,2025-04-16,Mehta Clothings,Central,Paid,Vikram Singh
+INV0046,PROD046,Wool Melton,25,1380,34500,900,2025-04-18,Agarwal Trading,North,Paid,Rahul Sharma
+INV0047,PROD050,Silk Habotai,28,1550,43400,1000,2025-04-20,Rajesh Garments,East,Paid,Priya Patel
+INV0048,PROD001,Premium Cotton Poplin,160,780,124800,520,2025-04-22,Kumar Exports,South,Paid,Amit Kumar
+INV0049,PROD028,Poly-Cotton Blend 65/35,280,540,151200,350,2025-04-25,Singh Fabrics,North,Paid,Sneha Reddy
+INV0050,PROD003,Cotton Cambric,190,580,110200,380,2025-04-28,Verma Fashion House,Central,Paid,Vikram Singh
+INV0051,PROD009,Polyester Satin,95,700,66500,450,2025-05-01,Kapoor Textiles,West,Paid,Rahul Sharma
+INV0052,PROD018,Raw Silk Noil,35,1400,49000,900,2025-05-03,Malhotra & Sons,North,Paid,Priya Patel
+INV0053,PROD023,Wool Gabardine,45,1250,56250,820,2025-05-05,Bajaj Fabrics,South,Paid,Amit Kumar
+INV0054,PROD032,Wool-Polyester Blend,55,960,52800,620,2025-05-08,Jain Silks,South,Paid,Sneha Reddy
+INV0055,PROD043,Poly-Linen Blend,80,650,52000,420,2025-05-10,Tiwari Enterprises,East,Paid,Vikram Singh
+INV0056,PROD048,Linen Jacquard,40,1130,45200,750,2025-05-12,Nair Textiles,South,Paid,Rahul Sharma
+INV0057,PROD002,Cotton Canvas Heavy,115,920,105800,600,2025-05-15,Reddy Garments,South,Paid,Priya Patel
+INV0058,PROD005,Cotton Twill Drill,130,740,96200,480,2025-05-17,Khan Textiles,Central,Paid,Amit Kumar
+INV0059,PROD010,Polyester Chiffon,175,480,84000,300,2025-05-20,Das Fabrics,East,Pending,Sneha Reddy
+INV0060,PROD014,Silk Dupioni,20,2100,42000,1400,2025-05-22,Choudhary Trading,North,Paid,Vikram Singh
+INV0061,PROD033,Terry Cotton Towelling,200,680,136000,440,2025-05-25,Iyer Silks,South,Paid,Rahul Sharma
+INV0062,PROD038,Muslin Cotton,280,420,117600,260,2025-05-27,Sharma Textiles,North,Paid,Priya Patel
+INV0063,PROD006,Cotton Denim 12oz,160,850,136000,550,2025-05-30,Gupta Fabrics,South,Paid,Amit Kumar
+INV0064,PROD047,Polyester Microfiber,240,400,96000,250,2025-06-02,Patel Enterprises,West,Paid,Sneha Reddy
+INV0065,PROD011,Polyester Taffeta,120,500,60000,320,2025-06-04,Mehta Clothings,Central,Paid,Vikram Singh
+INV0066,PROD024,Linen Plain Weave,85,980,83300,650,2025-06-06,Agarwal Trading,North,Paid,Rahul Sharma
+INV0067,PROD029,Poly-Viscose Suiting,100,740,74000,480,2025-06-09,Rajesh Garments,East,Paid,Priya Patel
+INV0068,PROD035,Jute Burlap,450,300,135000,180,2025-06-11,Kumar Exports,South,Paid,Amit Kumar
+INV0069,PROD040,Viscose Rayon,150,530,79500,340,2025-06-14,Singh Fabrics,North,Paid,Sneha Reddy
+INV0070,PROD044,Cotton Sateen,105,710,74550,460,2025-06-16,Verma Fashion House,Central,Paid,Vikram Singh
+INV0071,PROD004,Cotton Voile,155,520,80600,340,2025-06-18,Kapoor Textiles,West,Paid,Rahul Sharma
+INV0072,PROD015,Silk Charmeuse,28,1850,51800,1200,2025-06-20,Malhotra & Sons,North,Paid,Priya Patel
+INV0073,PROD020,Wool Flannel,55,1200,66000,780,2025-06-23,Bajaj Fabrics,South,Paid,Amit Kumar
+INV0074,PROD025,Linen Chambray,75,880,66000,580,2025-06-25,Jain Silks,South,Paid,Sneha Reddy
+INV0075,PROD034,Bamboo Rayon,90,650,58500,420,2025-06-28,Tiwari Enterprises,East,Paid,Vikram Singh
+INV0076,PROD039,Lycra Spandex,70,780,54600,500,2025-07-01,Nair Textiles,South,Paid,Rahul Sharma
+INV0077,PROD001,Premium Cotton Poplin,175,780,136500,520,2025-07-03,Reddy Garments,South,Paid,Priya Patel
+INV0078,PROD007,Cotton Flannel,90,650,58500,420,2025-07-05,Khan Textiles,Central,Paid,Amit Kumar
+INV0079,PROD012,Polyester Mesh,125,440,55000,280,2025-07-08,Das Fabrics,East,Pending,Sneha Reddy
+INV0080,PROD016,Silk Organza,18,1700,30600,1100,2025-07-10,Choudhary Trading,North,Paid,Vikram Singh
+INV0081,PROD028,Poly-Cotton Blend 65/35,320,540,172800,350,2025-07-12,Iyer Silks,South,Paid,Rahul Sharma
+INV0082,PROD036,Nylon Ripstop,75,590,44250,380,2025-07-15,Sharma Textiles,North,Paid,Priya Patel
+INV0083,PROD042,Silk Brocade,12,2700,32400,1800,2025-07-17,Gupta Fabrics,South,Paid,Amit Kumar
+INV0084,PROD008,Polyester Crepe,140,560,78400,360,2025-07-20,Patel Enterprises,West,Paid,Sneha Reddy
+INV0085,PROD013,Polyester Fleece,85,620,52700,400,2025-07-22,Mehta Clothings,Central,Paid,Vikram Singh
+INV0086,PROD022,Wool Cashmere Blend,15,2400,36000,1600,2025-07-25,Agarwal Trading,North,Paid,Rahul Sharma
+INV0087,PROD026,Linen Canvas,60,1050,63000,700,2025-07-27,Rajesh Garments,East,Paid,Priya Patel
+INV0088,PROD030,Cotton-Linen Blend,80,770,61600,500,2025-07-30,Kumar Exports,South,Paid,Amit Kumar
+INV0089,PROD037,Velvet Polyester,35,1080,37800,700,2025-08-02,Singh Fabrics,North,Paid,Sneha Reddy
+INV0090,PROD041,Corduroy Cotton,65,740,48100,480,2025-08-04,Verma Fashion House,Central,Paid,Vikram Singh
+INV0091,PROD045,Hemp Fabric,55,850,46750,550,2025-08-06,Kapoor Textiles,West,Paid,Rahul Sharma
+INV0092,PROD049,Cotton Interlock Knit,130,590,76700,380,2025-08-08,Malhotra & Sons,North,Paid,Priya Patel
+INV0093,PROD017,Silk Crepe de Chine,24,2000,48000,1300,2025-08-11,Bajaj Fabrics,South,Paid,Amit Kumar
+INV0094,PROD021,Merino Wool Jersey,38,1450,55100,950,2025-08-13,Jain Silks,South,Pending,Sneha Reddy
+INV0095,PROD027,Linen Slub,70,950,66500,620,2025-08-15,Tiwari Enterprises,East,Paid,Vikram Singh
+INV0096,PROD031,Silk-Cotton Blend,45,1150,51750,750,2025-08-18,Nair Textiles,South,Paid,Rahul Sharma
+INV0097,PROD046,Wool Melton,28,1380,38640,900,2025-08-20,Reddy Garments,South,Paid,Priya Patel
+INV0098,PROD050,Silk Habotai,32,1550,49600,1000,2025-08-22,Khan Textiles,Central,Paid,Amit Kumar
+INV0099,PROD003,Cotton Cambric,210,580,121800,380,2025-08-25,Das Fabrics,East,Paid,Sneha Reddy
+INV0100,PROD006,Cotton Denim 12oz,200,850,170000,550,2025-08-28,Choudhary Trading,North,Paid,Vikram Singh
+INV0101,PROD001,Premium Cotton Poplin,150,780,117000,520,2025-09-01,Iyer Silks,South,Paid,Rahul Sharma
+INV0102,PROD009,Polyester Satin,100,700,70000,450,2025-09-03,Sharma Textiles,North,Paid,Priya Patel
+INV0103,PROD019,Wool Tweed,42,1300,54600,850,2025-09-05,Gupta Fabrics,South,Paid,Amit Kumar
+INV0104,PROD028,Poly-Cotton Blend 65/35,350,540,189000,350,2025-09-08,Patel Enterprises,West,Paid,Sneha Reddy
+INV0105,PROD033,Terry Cotton Towelling,190,680,129200,440,2025-09-10,Mehta Clothings,Central,Paid,Vikram Singh
+INV0106,PROD038,Muslin Cotton,260,420,109200,260,2025-09-12,Agarwal Trading,North,Paid,Rahul Sharma
+INV0107,PROD002,Cotton Canvas Heavy,105,920,96600,600,2025-09-15,Rajesh Garments,East,Paid,Priya Patel
+INV0108,PROD010,Polyester Chiffon,165,480,79200,300,2025-09-17,Kumar Exports,South,Paid,Amit Kumar
+INV0109,PROD014,Silk Dupioni,22,2100,46200,1400,2025-09-20,Singh Fabrics,North,Paid,Sneha Reddy
+INV0110,PROD023,Wool Gabardine,48,1250,60000,820,2025-09-22,Verma Fashion House,Central,Paid,Vikram Singh
+INV0111,PROD035,Jute Burlap,480,300,144000,180,2025-09-25,Kapoor Textiles,West,Paid,Rahul Sharma
+INV0112,PROD047,Polyester Microfiber,250,400,100000,250,2025-09-27,Malhotra & Sons,North,Paid,Priya Patel
+INV0113,PROD005,Cotton Twill Drill,125,740,92500,480,2025-09-30,Bajaj Fabrics,South,Paid,Amit Kumar
+INV0114,PROD011,Polyester Taffeta,115,500,57500,320,2025-10-02,Jain Silks,South,Pending,Sneha Reddy
+INV0115,PROD018,Raw Silk Noil,38,1400,53200,900,2025-10-05,Tiwari Enterprises,East,Paid,Vikram Singh
+INV0116,PROD024,Linen Plain Weave,80,980,78400,650,2025-10-07,Nair Textiles,South,Paid,Rahul Sharma
+INV0117,PROD029,Poly-Viscose Suiting,95,740,70300,480,2025-10-10,Reddy Garments,South,Paid,Priya Patel
+INV0118,PROD032,Wool-Polyester Blend,60,960,57600,620,2025-10-12,Khan Textiles,Central,Paid,Amit Kumar
+INV0119,PROD043,Poly-Linen Blend,85,650,55250,420,2025-10-15,Das Fabrics,East,Paid,Sneha Reddy
+INV0120,PROD048,Linen Jacquard,42,1130,47460,750,2025-10-17,Choudhary Trading,North,Paid,Vikram Singh
+INV0121,PROD004,Cotton Voile,145,520,75400,340,2025-10-20,Iyer Silks,South,Paid,Rahul Sharma
+INV0122,PROD007,Cotton Flannel,95,650,61750,420,2025-10-22,Sharma Textiles,North,Paid,Priya Patel
+INV0123,PROD015,Silk Charmeuse,26,1850,48100,1200,2025-10-25,Gupta Fabrics,South,Paid,Amit Kumar
+INV0124,PROD020,Wool Flannel,52,1200,62400,780,2025-10-27,Patel Enterprises,West,Paid,Sneha Reddy
+INV0125,PROD025,Linen Chambray,72,880,63360,580,2025-10-30,Mehta Clothings,Central,Paid,Vikram Singh
+INV0126,PROD034,Bamboo Rayon,95,650,61750,420,2025-11-02,Agarwal Trading,North,Paid,Rahul Sharma
+INV0127,PROD040,Viscose Rayon,145,530,76850,340,2025-11-04,Rajesh Garments,East,Paid,Priya Patel
+INV0128,PROD044,Cotton Sateen,100,710,71000,460,2025-11-07,Kumar Exports,South,Paid,Amit Kumar
+INV0129,PROD001,Premium Cotton Poplin,165,780,128700,520,2025-11-10,Singh Fabrics,North,Paid,Sneha Reddy
+INV0130,PROD006,Cotton Denim 12oz,170,850,144500,550,2025-11-12,Verma Fashion House,Central,Paid,Vikram Singh
+INV0131,PROD008,Polyester Crepe,135,560,75600,360,2025-11-15,Kapoor Textiles,West,Paid,Rahul Sharma
+INV0132,PROD013,Polyester Fleece,100,620,62000,400,2025-11-17,Malhotra & Sons,North,Paid,Priya Patel
+INV0133,PROD016,Silk Organza,16,1700,27200,1100,2025-11-20,Bajaj Fabrics,South,Paid,Amit Kumar
+INV0134,PROD022,Wool Cashmere Blend,20,2400,48000,1600,2025-11-22,Jain Silks,South,Paid,Sneha Reddy
+INV0135,PROD026,Linen Canvas,58,1050,60900,700,2025-11-25,Tiwari Enterprises,East,Paid,Vikram Singh
+INV0136,PROD028,Poly-Cotton Blend 65/35,310,540,167400,350,2025-11-27,Nair Textiles,South,Paid,Rahul Sharma
+INV0137,PROD036,Nylon Ripstop,70,590,41300,380,2025-11-30,Reddy Garments,South,Paid,Priya Patel
+INV0138,PROD039,Lycra Spandex,65,780,50700,500,2025-12-02,Khan Textiles,Central,Paid,Amit Kumar
+INV0139,PROD042,Silk Brocade,14,2700,37800,1800,2025-12-05,Das Fabrics,East,Pending,Sneha Reddy
+INV0140,PROD003,Cotton Cambric,185,580,107300,380,2025-12-08,Choudhary Trading,North,Paid,Vikram Singh
+INV0141,PROD012,Polyester Mesh,120,440,52800,280,2025-12-10,Iyer Silks,South,Paid,Rahul Sharma
+INV0142,PROD017,Silk Crepe de Chine,20,2000,40000,1300,2025-12-12,Sharma Textiles,North,Paid,Priya Patel
+INV0143,PROD021,Merino Wool Jersey,32,1450,46400,950,2025-12-15,Gupta Fabrics,South,Paid,Amit Kumar
+INV0144,PROD030,Cotton-Linen Blend,85,770,65450,500,2025-12-17,Patel Enterprises,West,Paid,Sneha Reddy
+INV0145,PROD033,Terry Cotton Towelling,210,680,142800,440,2025-12-20,Mehta Clothings,Central,Paid,Vikram Singh
+INV0146,PROD037,Velvet Polyester,38,1080,41040,700,2025-12-22,Agarwal Trading,North,Paid,Rahul Sharma
+INV0147,PROD041,Corduroy Cotton,75,740,55500,480,2025-12-25,Rajesh Garments,East,Paid,Priya Patel
+INV0148,PROD045,Hemp Fabric,48,850,40800,550,2025-12-27,Kumar Exports,South,Paid,Amit Kumar
+INV0149,PROD049,Cotton Interlock Knit,135,590,79650,380,2025-12-30,Singh Fabrics,North,Paid,Sneha Reddy
+INV0150,PROD046,Wool Melton,30,1380,41400,900,2026-01-02,Verma Fashion House,Central,Paid,Vikram Singh
+INV0151,PROD050,Silk Habotai,30,1550,46500,1000,2026-01-05,Kapoor Textiles,West,Paid,Rahul Sharma
+INV0152,PROD001,Premium Cotton Poplin,180,780,140400,520,2026-01-08,Malhotra & Sons,North,Paid,Priya Patel
+INV0153,PROD009,Polyester Satin,110,700,77000,450,2026-01-10,Bajaj Fabrics,South,Paid,Amit Kumar
+INV0154,PROD014,Silk Dupioni,18,2100,37800,1400,2026-01-12,Jain Silks,South,Paid,Sneha Reddy
+INV0155,PROD019,Wool Tweed,45,1300,58500,850,2026-01-15,Tiwari Enterprises,East,Paid,Vikram Singh
+INV0156,PROD002,Cotton Canvas Heavy,120,920,110400,600,2026-01-18,Nair Textiles,South,Paid,Rahul Sharma
+INV0157,PROD005,Cotton Twill Drill,140,740,103600,480,2026-01-20,Reddy Garments,South,Paid,Priya Patel
+INV0158,PROD010,Polyester Chiffon,180,480,86400,300,2026-01-22,Khan Textiles,Central,Paid,Amit Kumar
+INV0159,PROD023,Wool Gabardine,50,1250,62500,820,2026-01-25,Das Fabrics,East,Pending,Sneha Reddy
+INV0160,PROD027,Linen Slub,68,950,64600,620,2026-01-28,Choudhary Trading,North,Paid,Vikram Singh
+INV0161,PROD031,Silk-Cotton Blend,42,1150,48300,750,2026-01-30,Iyer Silks,South,Paid,Rahul Sharma
+INV0162,PROD035,Jute Burlap,520,300,156000,180,2026-02-02,Sharma Textiles,North,Paid,Priya Patel
+INV0163,PROD038,Muslin Cotton,270,420,113400,260,2026-02-04,Gupta Fabrics,South,Paid,Amit Kumar
+INV0164,PROD047,Polyester Microfiber,260,400,104000,250,2026-02-07,Patel Enterprises,West,Paid,Sneha Reddy
+INV0165,PROD006,Cotton Denim 12oz,190,850,161500,550,2026-02-10,Mehta Clothings,Central,Paid,Vikram Singh
+INV0166,PROD011,Polyester Taffeta,110,500,55000,320,2026-02-12,Agarwal Trading,North,Paid,Rahul Sharma
+INV0167,PROD018,Raw Silk Noil,40,1400,56000,900,2026-02-15,Rajesh Garments,East,Paid,Priya Patel
+INV0168,PROD024,Linen Plain Weave,78,980,76440,650,2026-02-17,Kumar Exports,South,Paid,Amit Kumar
+INV0169,PROD028,Poly-Cotton Blend 65/35,340,540,183600,350,2026-02-20,Singh Fabrics,North,Paid,Sneha Reddy
+INV0170,PROD032,Wool-Polyester Blend,58,960,55680,620,2026-02-22,Verma Fashion House,Central,Paid,Vikram Singh
+INV0171,PROD043,Poly-Linen Blend,88,650,57200,420,2026-02-25,Kapoor Textiles,West,Paid,Rahul Sharma
+INV0172,PROD048,Linen Jacquard,38,1130,42940,750,2026-02-27,Malhotra & Sons,North,Paid,Priya Patel
+INV0173,PROD004,Cotton Voile,160,520,83200,340,2026-03-01,Bajaj Fabrics,South,Paid,Amit Kumar
+INV0174,PROD015,Silk Charmeuse,25,1850,46250,1200,2026-03-03,Jain Silks,South,Paid,Sneha Reddy
+INV0175,PROD020,Wool Flannel,48,1200,57600,780,2026-03-05,Tiwari Enterprises,East,Paid,Vikram Singh
+INV0176,PROD033,Terry Cotton Towelling,195,680,132600,440,2026-03-07,Nair Textiles,South,Paid,Rahul Sharma
+INV0177,PROD003,Cotton Cambric,195,580,113100,380,2026-03-09,Reddy Garments,South,Paid,Priya Patel

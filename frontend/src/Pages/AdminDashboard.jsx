@@ -35,71 +35,12 @@ import KPICard from '../analytics/components/KPICard'
 import LineChart from '../analytics/components/LineChart'
 import BarChart from '../analytics/components/BarChart'
 import PieChart from '../analytics/components/PieChart'
-import ScatterChart from '../analytics/components/ScatterChart'
-import FunnelChart from '../analytics/components/FunnelChart'
-import { 
-  getKPISummary, 
-  getSalesData, 
-  getCategoryData, 
-  getRegionalData,
-  getProductData,
-  getInventoryData,
-  getTopCustomers,
-  formatCurrency,
-  getProductCategoryData,
-  getProcessFlowData,
-  getDefectAnalysis,
-  getThroughputData,
-  getQualityMetrics,
-  getQualityTrend,
-  getPackingDispatchStatus,
-  getDispatchTimeline,
-  getProcessTimeBreakdown
-} from '../analytics/services/dataService'
+import AreaChart from '../analytics/components/AreaChart'
 
 const AdminDashboard = ({ user, onLogout }) => {
   const [currentPage, setCurrentPage] = useState('dashboard')
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [analyticsTab, setAnalyticsTab] = useState('overview')
   const [selectedUserId, setSelectedUserId] = useState(null)
-
-  // Analytics data state
-  const [kpiData, setKpiData] = useState(null)
-  const [salesData, setSalesData] = useState([])
-  const [regionalData, setRegionalData] = useState([])
-  const [topCustomers, setTopCustomers] = useState([])
-  const [productCategoryData, setProductCategoryData] = useState([])
-  const [processFlowData, setProcessFlowData] = useState([])
-  const [defectData, setDefectData] = useState([])
-  const [throughputData, setThroughputData] = useState([])
-  const [qualityMetrics, setQualityMetrics] = useState(null)
-  const [qualityTrend, setQualityTrend] = useState([])
-  const [packingStatus, setPackingStatus] = useState([])
-  const [dispatchTimeline, setDispatchTimeline] = useState([])
-  const [processTime, setProcessTime] = useState([])
-
-  // Load analytics data
-  useEffect(() => {
-    if (currentPage === 'analytics') {
-      loadAnalyticsData()
-    }
-  }, [currentPage])
-
-  const loadAnalyticsData = () => {
-    setKpiData(getKPISummary())
-    setSalesData(getSalesData(30))
-    setRegionalData(getRegionalData())
-    setTopCustomers(getTopCustomers().slice(0, 8))
-    setProductCategoryData(getProductCategoryData())
-    setProcessFlowData(getProcessFlowData())
-    setDefectData(getDefectAnalysis())
-    setThroughputData(getThroughputData())
-    setQualityMetrics(getQualityMetrics())
-    setQualityTrend(getQualityTrend())
-    setPackingStatus(getPackingDispatchStatus())
-    setDispatchTimeline(getDispatchTimeline())
-    setProcessTime(getProcessTimeBreakdown())
-  }
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen)
@@ -122,23 +63,7 @@ const AdminDashboard = ({ user, onLogout }) => {
       case 'orders':
         return <AdminOrders />
       case 'analytics':
-        return <AnalyticsSection 
-          analyticsTab={analyticsTab}
-          setAnalyticsTab={setAnalyticsTab}
-          kpiData={kpiData}
-          salesData={salesData}
-          regionalData={regionalData}
-          topCustomers={topCustomers}
-          productCategoryData={productCategoryData}
-          processFlowData={processFlowData}
-          defectData={defectData}
-          throughputData={throughputData}
-          qualityMetrics={qualityMetrics}
-          qualityTrend={qualityTrend}
-          packingStatus={packingStatus}
-          dispatchTimeline={dispatchTimeline}
-          processTime={processTime}
-        />
+        return <AnalyticsSection />
       default:
         return <DashboardHome user={user} />
     }
@@ -1812,114 +1737,551 @@ const IssuesManagement = () => {
 }
 
 // Analytics Section Component
-const AnalyticsSection = ({ 
-  analyticsTab, 
-  setAnalyticsTab,
-  kpiData,
-  salesData,
-  regionalData,
-  topCustomers,
-  productCategoryData,
-  processFlowData,
-  defectData,
-  throughputData,
-  qualityMetrics,
-  qualityTrend,
-  packingStatus,
-  dispatchTimeline,
-  processTime
-}) => {
-  if (!kpiData || !qualityMetrics) {
-    return <div className="loading-state">Loading analytics data...</div>
+const AnalyticsSection = () => {
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [activeTab, setActiveTab] = useState('overview')
+  const [data, setData] = useState(null)
+
+  const toInputDate = (rawDate) => {
+    if (!rawDate) return ''
+    const d = new Date(rawDate)
+    if (Number.isNaN(d.getTime())) return ''
+    const offsetMs = d.getTimezoneOffset() * 60000
+    return new Date(d.getTime() - offsetMs).toISOString().slice(0, 10)
   }
 
-  const analyticsTabs = [
-    { id: 'overview', label: 'Business Overview', icon: BarChart3 },
-    { id: 'product', label: 'Product Analytics', icon: Package },
-    { id: 'process', label: 'Process Flow', icon: Factory },
-    { id: 'manufacturing', label: 'Time & Throughput', icon: Settings },
-    { id: 'quality', label: 'Quality Control', icon: CheckCircle },
-    { id: 'dispatch', label: 'Packing & Dispatch', icon: Truck }
-  ]
+  const toDisplayDate = (inputDate) => {
+    if (!inputDate || !/^\d{4}-\d{2}-\d{2}$/.test(inputDate)) return inputDate || ''
+    const [year, month, day] = inputDate.split('-')
+    return `${day}-${month}-${year}`
+  }
 
-  const renderAnalyticsContent = () => {
-    switch (analyticsTab) {
-      case 'overview':
-        return renderOverview()
-      case 'product':
-        return renderProductAnalytics()
-      case 'process':
-        return renderProcessFlow()
-      case 'manufacturing':
-        return renderManufacturingAnalytics()
-      case 'quality':
-        return renderQualityAnalytics()
-      case 'dispatch':
-        return renderDispatchAnalytics()
-      default:
-        return renderOverview()
+  const getDefaultDates = () => {
+    const end = new Date()
+    const start = new Date(end)
+    start.setDate(start.getDate() - 89)
+    return {
+      startDate: toInputDate(start),
+      endDate: toInputDate(end)
     }
   }
 
+  const defaults = getDefaultDates()
+  const [startDate, setStartDate] = useState(defaults.startDate)
+  const [endDate, setEndDate] = useState(defaults.endDate)
+  const [datePreset, setDatePreset] = useState('last90')
+  const [trendGranularity, setTrendGranularity] = useState('month')
+  const [drillStack, setDrillStack] = useState([])
+  const [salesDrillCategory, setSalesDrillCategory] = useState('')
+  const [salesDrillProductId, setSalesDrillProductId] = useState('')
+  const [salesDrillProductName, setSalesDrillProductName] = useState('')
+
+  const fetchAnalytics = async (opts = {}) => {
+    const start = opts.startDate || startDate
+    const end = opts.endDate || endDate
+    const granularity = opts.granularity || trendGranularity
+
+    if (!start || !end) return
+
+    const normalizedStart = start <= end ? start : end
+    const normalizedEnd = end >= start ? end : start
+
+    try {
+      setLoading(true)
+      setError(null)
+      const res = await axios.get('/api/analytics/dashboard', {
+        params: {
+          startDate: normalizedStart,
+          endDate: normalizedEnd,
+          granularity,
+          drillCategory: salesDrillCategory || undefined,
+          drillProductId: salesDrillProductId || undefined
+        }
+      })
+      setData(res.data)
+    } catch (err) {
+      console.error('Analytics fetch error:', err)
+      setError('Failed to load analytics data.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchAnalytics()
+  }, [startDate, endDate, trendGranularity, salesDrillCategory, salesDrillProductId])
+
+  if (loading) return <div className="loading-state">Loading analytics data...</div>
+  if (error) return <div className="loading-state" style={{ color: '#e53e3e' }}>{error}</div>
+  if (!data) return null
+
+  const kpis = data.kpiCards || {}
+  const cancRate = data.cancellationData?.cancellationRate ?? 0
+
+  const presets = [
+    { id: 'last7', label: 'Last 7 Days', days: 6 },
+    { id: 'last30', label: 'Last 30 Days', days: 29 },
+    { id: 'last90', label: 'Last 90 Days', days: 89 },
+    { id: 'last180', label: 'Last 180 Days', days: 179 },
+    { id: 'ytd', label: 'Year to Date', ytd: true },
+    { id: 'custom', label: 'Custom' }
+  ]
+
+  const applyPreset = (presetId) => {
+    setDatePreset(presetId)
+    if (presetId === 'custom') return
+
+    const now = new Date()
+    let nextStart = new Date(now)
+
+    if (presetId === 'ytd') {
+      nextStart = new Date(now.getFullYear(), 0, 1)
+    } else {
+      const preset = presets.find(p => p.id === presetId)
+      const days = preset?.days ?? 89
+      nextStart.setDate(now.getDate() - days)
+    }
+
+    setStartDate(toInputDate(nextStart))
+    setEndDate(toInputDate(now))
+    setDrillStack([])
+    setSalesDrillCategory('')
+    setSalesDrillProductId('')
+    setSalesDrillProductName('')
+  }
+
+  const getRangeLabel = () => {
+    const start = data?.dateRange?.startDate ? toInputDate(data.dateRange.startDate) : startDate
+    const end = data?.dateRange?.endDate ? toInputDate(data.dateRange.endDate) : endDate
+    return `${toDisplayDate(start)} to ${toDisplayDate(end)}`
+  }
+
+  const handleTrendPointDrillDown = (point) => {
+    if (trendGranularity !== 'month' || !point?.year || !point?.month) return
+
+    const monthStart = new Date(point.year, point.month - 1, 1)
+    const monthEnd = new Date(point.year, point.month, 0)
+
+    setDrillStack(prev => [
+      ...prev,
+      {
+        startDate,
+        endDate,
+        granularity: trendGranularity,
+        label: point.label
+      }
+    ])
+
+    setStartDate(toInputDate(monthStart))
+    setEndDate(toInputDate(monthEnd))
+    setTrendGranularity('day')
+    setDatePreset('custom')
+  }
+
+  const handleDrillUp = () => {
+    if (drillStack.length === 0) return
+    const previous = drillStack[drillStack.length - 1]
+    setDrillStack(prev => prev.slice(0, -1))
+    setStartDate(previous.startDate)
+    setEndDate(previous.endDate)
+    setTrendGranularity(previous.granularity)
+  }
+
+  const handleCategoryDrillDown = (raw) => {
+    const category = raw?.category || raw?.name
+    if (!category) return
+    setSalesDrillCategory(category)
+    setSalesDrillProductId('')
+    setSalesDrillProductName('')
+  }
+
+  const handleProductDrillDown = (raw) => {
+    const productId = String(raw?.productId || '').trim().toUpperCase()
+    const productName = raw?.productName || raw?.name || ''
+    if (!productId) return
+    setSalesDrillProductId(productId)
+    setSalesDrillProductName(productName)
+  }
+
+  const handleSalesDrillUp = () => {
+    if (salesDrillProductId) {
+      setSalesDrillProductId('')
+      setSalesDrillProductName('')
+      return
+    }
+    if (salesDrillCategory) {
+      setSalesDrillCategory('')
+    }
+  }
+
+  const handleChartDrillUp = () => {
+    if (salesDrillProductId || salesDrillCategory) {
+      handleSalesDrillUp()
+      return
+    }
+    handleDrillUp()
+  }
+
+  const clearSalesDrill = () => {
+    setSalesDrillCategory('')
+    setSalesDrillProductId('')
+    setSalesDrillProductName('')
+  }
+
+  // ── Gauge Chart (Cancellation Rate) ──────────────────────────────────────
+  const GaugeChart = ({ rate, title }) => {
+    const gaugeData = [{ name: 'Rate', value: parseFloat(rate), fill: rate > 20 ? '#f5576c' : rate > 10 ? '#ffa726' : '#43e97b' }]
+    const { RadialBarChart, RadialBar, PolarAngleAxis } = window.Recharts || {}
+    const safeRate = Math.min(100, Math.max(0, parseFloat(rate) || 0))
+    return (
+      <div className="chart-container">
+        {title && <h3 className="chart-title">{title}</h3>}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 280 }}>
+          <div style={{
+            width: 180, height: 180, borderRadius: '50%',
+            background: `conic-gradient(${safeRate > 20 ? '#f5576c' : safeRate > 10 ? '#ffa726' : '#43e97b'} ${safeRate * 3.6}deg, #e2e8f0 0deg)`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+          }}>
+            <div style={{
+              width: 130, height: 130, borderRadius: '50%', background: '#fff',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
+            }}>
+              <span style={{ fontSize: '2rem', fontWeight: 700, color: safeRate > 20 ? '#f5576c' : safeRate > 10 ? '#ffa726' : '#43e97b' }}>
+                {safeRate.toFixed(1)}%
+              </span>
+              <span style={{ fontSize: '0.75rem', color: '#718096', marginTop: 2 }}>Cancellation</span>
+            </div>
+          </div>
+          <div style={{ marginTop: 16, display: 'flex', gap: 24, fontSize: '0.8rem' }}>
+            <span style={{ color: '#43e97b', fontWeight: 600 }}>● &lt;10% Good</span>
+            <span style={{ color: '#ffa726', fontWeight: 600 }}>● 10–20% Warning</span>
+            <span style={{ color: '#f5576c', fontWeight: 600 }}>● &gt;20% High</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const tabs = [
+    { id: 'overview',   label: 'Overview',   icon: BarChart3 },
+    { id: 'sales',      label: 'Sales',      icon: TrendingUp },
+    { id: 'customers',  label: 'Customers',  icon: Users },
+    { id: 'inventory',  label: 'Inventory',  icon: Package },
+  ]
+
+  // ── Tab 1: Overview ───────────────────────────────────────────────────────
   const renderOverview = () => (
     <>
+      {/* #1 #2 #12 + extras — KPI Cards */}
       <div className="kpi-grid">
-        <KPICard
-          title="Total Revenue"
-          value={kpiData.totalRevenue.value}
-          change={kpiData.totalRevenue.change}
-          currency="₹"
-          icon={DollarSign}
-        />
-        <KPICard
-          title="Total Orders"
-          value={kpiData.totalOrders.value}
-          change={kpiData.totalOrders.change}
-          icon={ShoppingCart}
-        />
-        <KPICard
-          title="Total Customers"
-          value={kpiData.totalCustomers.value}
-          change={kpiData.totalCustomers.change}
-          icon={Users}
-        />
-        <KPICard
-          title="Avg Order Value"
-          value={kpiData.avgOrderValue.value}
-          change={kpiData.avgOrderValue.change}
-          currency="₹"
-          icon={TrendingUp}
-        />
-        <KPICard
-          title="Low Stock Items"
-          value={kpiData.lowStockProducts.value}
-          icon={Package}
-        />
+        <KPICard title="Total Orders"    value={kpis.totalOrders || 0}                     icon={ShoppingCart} />
+        <KPICard title="Total Revenue"   value={kpis.totalRevenue || 0}       currency="₹" icon={DollarSign} />
+        <KPICard title="Total Customers" value={kpis.totalCustomers || 0}                  icon={Users} />
+        <KPICard title="Avg Order Value" value={kpis.averageOrderValue || 0}  currency="₹" icon={TrendingUp} />
+        <KPICard title="Low Stock Items" value={(data.lowStockProducts || []).length}       icon={Package} />
       </div>
 
+      {/* #3 Monthly Sales Trend → Line Chart | #4 Daily Order Activity → Area Chart */}
       <div className="charts-row">
         <div className="chart-half">
           <LineChart
-            data={salesData}
-            xKey="date"
-            yKeys={[{ dataKey: 'revenue', name: 'Revenue' }]}
-            colors={['#667eea']}
-            title="Revenue Over Time (Last 30 Days)"
-            valuePrefix="₹"
+            data={(data.monthlySalesTrend || []).map(m => ({
+              label: m.label,
+              revenue: m.totalRevenue,
+              orders: m.orderCount,
+              year: m.year,
+              month: m.month,
+              week: m.week,
+              day: m.day
+            }))}
+            xKey="label"
+            yKeys={[
+              { dataKey: 'revenue', name: 'Revenue' },
+              { dataKey: 'orders',  name: 'Orders'  },
+            ]}
+            colors={['#667eea', '#43e97b']}
+            title={`Sales Trend (${trendGranularity === 'month' ? 'Monthly' : trendGranularity === 'week' ? 'Weekly' : 'Daily'})`}
             height={350}
+            onPointClick={handleTrendPointDrillDown}
+            onChartClick={handleChartDrillUp}
           />
         </div>
         <div className="chart-half">
-          <LineChart
-            data={salesData}
+          <AreaChart
+            data={(data.dailyOrderActivity || []).map(d => ({
+              date: d.date, orders: d.orderCount, revenue: d.totalRevenue
+            }))}
             xKey="date"
             yKeys={[
-              { dataKey: 'orders', name: 'Orders' },
-              { dataKey: 'customers', name: 'Customers' }
+              { dataKey: 'orders',  name: 'Orders'  },
+              { dataKey: 'revenue', name: 'Revenue' },
             ]}
-            colors={['#43e97b', '#fa709a']}
-            title="Orders & Customers Trend"
+            colors={['#fa709a', '#667eea']}
+            title="Daily Order Activity"
             height={350}
+            onChartClick={handleChartDrillUp}
+          />
+        </div>
+      </div>
+      <div className="charts-row">
+        <div className="chart-half">
+          <PieChart
+            data={(data.orderStatusDistribution || []).map(s => ({ name: s.status, value: s.count }))}
+            dataKey="value"
+            nameKey="name"
+            title="Order Status Distribution"
+            height={350}
+            onChartClick={handleChartDrillUp}
+          />
+        </div>
+        <div className="chart-half">
+          <GaugeChart rate={cancRate} title="Order Cancellation Rate" />
+        </div>
+      </div>
+    </>
+  )
+
+  // ── Tab 2: Sales & Products ───────────────────────────────────────────────
+  const renderSales = () => {
+    const categoryProducts = data.categoryProductBreakdown || []
+    const productTrend = data.productDrillTrend || []
+    const productSummary = data.productDrillSummary || null
+    const isCategoryDrilled = !!salesDrillCategory
+    const isProductDrilled = !!salesDrillProductId
+
+    return (
+      <>
+        {/* Category level */}
+        {!isCategoryDrilled && (
+          <div className="charts-row">
+            <div className="chart-half">
+              <BarChart
+                data={data.salesByCategory || []}
+                xKey="category"
+                yKeys={[{ dataKey: 'totalQuantity', name: 'Units Sold' }]}
+                colors={['#667eea']}
+                title="Sales by Product Category (Click to Drill Down)"
+                height={380}
+                layout="horizontal"
+                onBarClick={handleCategoryDrillDown}
+                onChartClick={handleChartDrillUp}
+              />
+            </div>
+            <div className="chart-half">
+              <PieChart
+                data={(data.revenueByCategory || []).map(c => ({ category: c.category, name: c.category, value: c.totalRevenue }))}
+                dataKey="value"
+                nameKey="name"
+                title="Revenue by Product Category (Click Slice to Drill Down)"
+                valuePrefix="₹"
+                height={380}
+                onSliceClick={handleCategoryDrillDown}
+                onChartClick={handleChartDrillUp}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Category -> Product level */}
+        {isCategoryDrilled && !isProductDrilled && (
+          <div className="charts-row">
+            <div className="chart-half">
+              <BarChart
+                data={categoryProducts}
+                xKey="productName"
+                yKeys={[{ dataKey: 'totalQuantity', name: 'Units Sold' }]}
+                colors={['#43e97b']}
+                title={`Products in ${salesDrillCategory} (Click Product to Drill Down)`}
+                height={420}
+                layout="vertical"
+                onBarClick={handleProductDrillDown}
+                onChartClick={handleChartDrillUp}
+              />
+            </div>
+            <div className="chart-half">
+              <BarChart
+                data={categoryProducts}
+                xKey="productName"
+                yKeys={[{ dataKey: 'totalRevenue', name: 'Revenue' }]}
+                colors={['#764ba2']}
+                title={`Revenue by Product in ${salesDrillCategory}`}
+                valuePrefix="₹"
+                height={420}
+                layout="vertical"
+                onBarClick={handleProductDrillDown}
+                onChartClick={handleChartDrillUp}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Product level */}
+        {isProductDrilled && (
+          <>
+            {productSummary && (
+              <div className="kpi-grid">
+                <KPICard title="Product Orders" value={productSummary.orderCount || 0} icon={ShoppingCart} />
+                <KPICard title="Units Sold" value={productSummary.totalQuantity || 0} icon={Package} />
+                <KPICard title="Revenue" value={productSummary.totalRevenue || 0} currency="₹" icon={DollarSign} />
+                <KPICard title="Avg Unit Price" value={productSummary.avgUnitPrice || 0} currency="₹" icon={TrendingUp} />
+              </div>
+            )}
+            <div className="charts-row">
+              <div className="chart-full">
+                <LineChart
+                  data={productTrend.map(p => ({
+                    label: p.label,
+                    quantity: p.totalQuantity,
+                    revenue: p.totalRevenue,
+                    orders: p.orderCount
+                  }))}
+                  xKey="label"
+                  yKeys={[
+                    { dataKey: 'quantity', name: 'Units Sold' },
+                    { dataKey: 'orders', name: 'Orders' },
+                    { dataKey: 'revenue', name: 'Revenue' }
+                  ]}
+                  colors={['#43e97b', '#30cfd0', '#667eea']}
+                  title={`Product Trend - ${salesDrillProductName || salesDrillProductId}`}
+                  valuePrefix="₹"
+                  height={420}
+                  onChartClick={handleChartDrillUp}
+                />
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Global sales analytics */}
+        {!isCategoryDrilled && !isProductDrilled && (
+          <>
+            <div className="charts-row">
+              <div className="chart-half">
+                <LineChart
+                  data={data.cumulativeRevenueTrend || []}
+                  xKey="label"
+                  yKeys={[
+                    { dataKey: 'dailyRevenue', name: 'Daily Revenue' },
+                    { dataKey: 'cumulativeRevenue', name: 'Cumulative Revenue' }
+                  ]}
+                  colors={['#f093fb', '#667eea']}
+                  title="Cumulative Revenue Progress"
+                  valuePrefix="₹"
+                  height={380}
+                  onChartClick={handleChartDrillUp}
+                />
+              </div>
+              <div className="chart-half">
+                <BarChart
+                  data={data.revenueByWeekday || []}
+                  xKey="day"
+                  yKeys={[
+                    { dataKey: 'orderCount', name: 'Orders' },
+                    { dataKey: 'totalRevenue', name: 'Revenue' }
+                  ]}
+                  colors={['#30cfd0', '#764ba2']}
+                  title="Weekday Revenue Pattern"
+                  height={380}
+                  layout="horizontal"
+                  onChartClick={handleChartDrillUp}
+                />
+              </div>
+            </div>
+
+            <div className="charts-row">
+              <div className="chart-half">
+                <BarChart
+                  data={data.topSellingProducts || []}
+                  xKey="productName"
+                  yKeys={[{ dataKey: 'totalQuantity', name: 'Units Sold' }]}
+                  colors={['#43e97b']}
+                  title="Top Selling Products"
+                  height={420}
+                  layout="vertical"
+                  onBarClick={handleProductDrillDown}
+                  onChartClick={handleChartDrillUp}
+                />
+              </div>
+              <div className="chart-half">
+                <BarChart
+                  data={data.leastSellingProducts || []}
+                  xKey="productName"
+                  yKeys={[{ dataKey: 'totalQuantity', name: 'Units Sold' }]}
+                  colors={['#f5576c']}
+                  title="Least Selling Products"
+                  height={420}
+                  layout="vertical"
+                  onBarClick={handleProductDrillDown}
+                  onChartClick={handleChartDrillUp}
+                />
+              </div>
+            </div>
+
+            <div className="charts-row">
+              <div className="chart-half">
+                <BarChart
+                  data={data.priceRangePerformance || []}
+                  xKey="priceRange"
+                  yKeys={[
+                    { dataKey: 'count',        name: 'Transactions' },
+                    { dataKey: 'totalRevenue', name: 'Revenue (₹)'  },
+                  ]}
+                  colors={['#667eea', '#f093fb']}
+                  title="Price Range Performance — Histogram"
+                  height={420}
+                  layout="horizontal"
+                  onChartClick={handleChartDrillUp}
+                />
+              </div>
+              <div className="chart-half">
+                <LineChart
+                  data={data.revenueGrowthRate || []}
+                  xKey="label"
+                  yKeys={[{ dataKey: 'growthRate', name: 'Growth %' }]}
+                  colors={['#43e97b']}
+                  title="Revenue Growth Rate (%)"
+                  height={420}
+                  onChartClick={handleChartDrillUp}
+                />
+              </div>
+            </div>
+          </>
+        )}
+      </>
+    )
+  }
+
+  // ── Tab 3: Customers ──────────────────────────────────────────────────────
+  const renderCustomers = () => (
+    <>
+      {/* #9 Customer Growth → Line Chart | #10 Top Customers → Bar Chart */}
+      <div className="charts-row">
+        <div className="chart-half">
+          <LineChart
+            data={data.customerGrowth || []}
+            xKey="label"
+            yKeys={[{ dataKey: 'newCustomers', name: 'New Customers' }]}
+            colors={['#43e97b']}
+            title="Customer Growth Analysis"
+            height={380}
+            onChartClick={handleChartDrillUp}
+          />
+        </div>
+        <div className="chart-half">
+          <BarChart
+            data={(data.topCustomers || []).map(c => ({
+              name: c.customerName, revenue: c.totalRevenue, orders: c.orderCount
+            }))}
+            xKey="name"
+            yKeys={[{ dataKey: 'revenue', name: 'Revenue' }]}
+            colors={['#f093fb']}
+            title="Top Customers by Revenue"
+            valuePrefix="₹"
+            height={380}
+            layout="vertical"
+            onChartClick={handleChartDrillUp}
           />
         </div>
       </div>
@@ -1927,484 +2289,235 @@ const AnalyticsSection = ({
       <div className="charts-row">
         <div className="chart-half">
           <PieChart
-            data={regionalData}
-            dataKey="revenue"
-            nameKey="region"
-            title="Revenue Distribution by Region"
-            valuePrefix="₹"
-            height={350}
-          />
-        </div>
-        <div className="chart-half">
-          <BarChart
-            data={topCustomers}
-            xKey="name"
-            yKeys={[{ dataKey: 'revenue', name: 'Revenue' }]}
-            colors={['#f093fb']}
-            title="Top 8 Customers by Revenue"
-            valuePrefix="₹"
-            height={350}
-            layout="vertical"
+            data={[
+              { name: 'New Customers', value: data.customerPurchasePattern?.newCustomers || 0 },
+              { name: 'Returning Customers', value: data.customerPurchasePattern?.returningCustomers || 0 }
+            ]}
+            dataKey="value"
+            nameKey="name"
+            title="New vs Returning Customers"
+            height={380}
+            onChartClick={handleChartDrillUp}
           />
         </div>
       </div>
     </>
   )
 
-  const renderProductAnalytics = () => {
-    if (!productCategoryData.length) return <div>Loading product data...</div>
-    
+  // ── Tab 4: Inventory ──────────────────────────────────────────────────────
+  const renderInventory = () => {
+    const lowStock = data.lowStockProducts || []
+    const inventoryTopItems = (data.inventoryStockLevels || []).slice(0, 10)
     return (
       <>
         <div className="kpi-grid">
-          <KPICard
-            title="Total Product Categories"
-            value={productCategoryData.length}
-            icon={Package}
-          />
-          <KPICard
-            title="Total SKUs"
-            value={productCategoryData.reduce((acc, cat) => acc + (cat?.skuCount || 0), 0)}
-            icon={BarChart3}
-          />
-          <KPICard
-            title="Avg Units per Category"
-            value={Math.round(productCategoryData.reduce((acc, cat) => acc + (cat?.units || 0), 0) / productCategoryData.length) || 0}
-            icon={ShoppingCart}
-          />
-          <KPICard
-            title="Total Production"
-            value={productCategoryData.reduce((acc, cat) => acc + (cat?.units || 0), 0)}
-            icon={Factory}
-          />
+          <KPICard title="Total SKUs"        value={(data.inventoryStockLevels || []).length} icon={Package} />
+          <KPICard title="Low Stock Alerts"  value={lowStock.length}                           icon={AlertCircle} />
+          <KPICard title="Fast Moving (90d)" value={(data.fastMovingProducts || []).length}    icon={TrendingUp} />
+          <KPICard title="Slow Moving (90d)" value={(data.slowMovingProducts || []).length}    icon={ShoppingCart} />
         </div>
 
+        {/* #14 Inventory Stock Levels → Horizontal Bar */}
         <div className="charts-row">
-          <div className="chart-half">
+          <div className="chart-full">
             <BarChart
-              data={productCategoryData}
-              xKey="category"
-              yKeys={[{ dataKey: 'units', name: 'Units Produced' }]}
-              colors={['#667eea']}
-              title="Production by Product Category"
-              height={350}
-            />
-          </div>
-          <div className="chart-half">
-            <PieChart
-              data={productCategoryData}
-              dataKey="revenue"
-              nameKey="category"
-              title="Revenue Contribution by Product"
-              valuePrefix="₹"
-              height={350}
-            />
-          </div>
-        </div>
-
-        <div className="charts-row">
-          <div className="chart-full">
-            <div className="analytics-card">
-              <h3 className="card-title">Product Category Details</h3>
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Category</th>
-                    <th>Units Produced</th>
-                    <th>Revenue</th>
-                    <th>SKU Count</th>
-                    <th>Market Segment</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {productCategoryData.map((cat, index) => (
-                    <tr key={cat?.category || index}>
-                      <td>{cat?.category || 'N/A'}</td>
-                      <td>{cat?.units?.toLocaleString() || '0'}</td>
-                      <td>{formatCurrency(cat?.revenue || 0)}</td>
-                      <td>{cat?.skuCount || 0}</td>
-                      <td>{cat?.segment || 'N/A'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </>
-    )
-  }
-
-  const renderProcessFlow = () => {
-    if (!processFlowData.length) return <div>Loading process data...</div>
-    
-    return (
-      <>
-        <div className="kpi-grid">
-          <KPICard
-            title="Process Stages"
-            value={processFlowData.length}
-            icon={Factory}
-          />
-          <KPICard
-            title="Total Loss %"
-            value={processFlowData[0]?.input && processFlowData[processFlowData.length - 1]?.output ? ((1 - processFlowData[processFlowData.length - 1].output / processFlowData[0].input) * 100).toFixed(1) + '%' : '0.0%'}
-            icon={TrendingUp}
-          />
-          <KPICard
-            title="Avg Utilization"
-            value={Math.round(processFlowData.reduce((acc, stage) => acc + (stage?.utilization || 0), 0) / processFlowData.length) + '%'}
-            icon={Settings}
-          />
-          <KPICard
-            title="Total Defects"
-            value={processFlowData.reduce((acc, stage) => acc + stage.defects, 0)}
-            icon={Package}
-          />
-        </div>
-
-        <div className="charts-row">
-          <div className="chart-full">
-            <FunnelChart
-              data={processFlowData}
-              title="Manufacturing Process Pipeline"
-              height={400}
-            />
-          </div>
-        </div>
-
-        <div className="charts-row">
-          <div className="chart-half">
-            <BarChart
-              data={defectData}
-              xKey="stage"
+              data={inventoryTopItems.map(p => ({
+                productName: p.productName, quantityInStock: p.quantityInStock, reorderLevel: p.reorderLevel
+              }))}
+              xKey="productName"
               yKeys={[
-                { dataKey: 'colorMismatch', name: 'Color Mismatch' },
-                { dataKey: 'stitchError', name: 'Stitch Error' },
-                { dataKey: 'printBlur', name: 'Print Blur' },
-                { dataKey: 'fabricTear', name: 'Fabric Tear' },
-                { dataKey: 'other', name: 'Other' }
+                { dataKey: 'quantityInStock', name: 'In Stock'      },
+                { dataKey: 'reorderLevel',    name: 'Reorder Level' },
               ]}
-              colors={['#f093fb', '#f5576c', '#ffa726', '#43e97b', '#667eea']}
-              title="Defect Analysis by Stage"
-              height={350}
-              stacked={true}
+              colors={['#43e97b', '#f5576c']}
+              title="Inventory Stock Levels (Top 10 Products)"
+              height={360}
+              layout="vertical"
+              onChartClick={handleChartDrillUp}
             />
           </div>
-          <div className="chart-half">
-            <div className="analytics-card">
-              <h3 className="card-title">Process Stage Details</h3>
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Stage</th>
-                    <th>Input</th>
-                    <th>Output</th>
-                    <th>Loss %</th>
-                    <th>Defects</th>
-                    <th>Utilization</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {processFlowData.map((stage, index) => (
-                    <tr key={stage?.stage || index}>
-                      <td>{stage?.stage || 'N/A'}</td>
-                      <td>{stage?.input?.toLocaleString() || '0'}</td>
-                      <td>{stage?.output?.toLocaleString() || '0'}</td>
-                      <td className={(stage?.loss || 0) > 2 ? 'text-danger' : ''}>
-                        {stage?.loss?.toFixed(1) || '0.0'}%
-                      </td>
-                      <td>{stage?.defects || 0}</td>
-                      <td>{stage?.utilization || 0}%</td>
+        </div>
+
+        {/* #15 Low Stock Detection → Table + Alert */}
+        {lowStock.length > 0 && (
+          <div className="charts-row">
+            <div className="chart-full">
+              <div className="analytics-card">
+                <h3 className="card-title" style={{ color: '#f5576c', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <AlertCircle size={18} /> Low Stock Detection — {lowStock.length} items need attention
+                </h3>
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Category</th>
+                      <th>In Stock</th>
+                      <th>Reorder Level</th>
+                      <th>Deficit</th>
+                      <th>Alert</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </>
-    )
-  }
-
-  const renderManufacturingAnalytics = () => {
-    if (!processFlowData.length || !throughputData.length || !processTime.length || !dispatchTimeline.length) {
-      return <div>Loading manufacturing data...</div>
-    }
-    
-    return (
-      <>
-        <div className="kpi-grid">
-          <KPICard
-            title="Avg Process Time"
-            value={Math.round(processFlowData.reduce((acc, stage) => acc + (stage?.time || 0), 0) / processFlowData.length) + ' hrs'}
-            icon={Settings}
-          />
-          <KPICard
-            title="Orders Received"
-            value={throughputData.reduce((acc, day) => acc + (day?.received || 0), 0)}
-            icon={ShoppingCart}
-          />
-          <KPICard
-            title="Orders Completed"
-            value={throughputData.reduce((acc, day) => acc + (day?.completed || 0), 0)}
-            change={5.2}
-            icon={CheckCircle}
-          />
-          <KPICard
-            title="On-Time Delivery"
-            value={dispatchTimeline.length ? ((dispatchTimeline.filter(d => d?.onTime).length / dispatchTimeline.length) * 100).toFixed(0) + '%' : '0%'}
-            change={3.4}
-            icon={Truck}
-          />
-        </div>
-
-        <div className="charts-row">
-          <div className="chart-half">
-            <LineChart
-              data={throughputData}
-              xKey="date"
-              yKeys={[
-                { dataKey: 'received', name: 'Received' },
-                { dataKey: 'completed', name: 'Completed' }
-              ]}
-              colors={['#667eea', '#43e97b']}
-              title="Daily Order Throughput (Last 30 Days)"
-              height={350}
-            />
-          </div>
-          <div className="chart-half">
-            <BarChart
-              data={processTime}
-              xKey="stage"
-              yKeys={[{ dataKey: 'hours', name: 'Hours' }]}
-              colors={['#f093fb']}
-              title="Process Time Breakdown"
-              height={350}
-              layout="horizontal"
-            />
-          </div>
-        </div>
-
-        <div className="charts-row">
-          <div className="chart-full">
-            <div className="analytics-card">
-              <h3 className="card-title">Process Time Details</h3>
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Stage</th>
-                    <th>Average Time (hrs)</th>
-                    <th>% of Total Time</th>
-                    <th>Bottleneck</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {processTime.map((stage, index) => (
-                    <tr key={stage?.stage || index}>
-                      <td>{stage?.stage || 'N/A'}</td>
-                      <td>{stage?.hours || 0}</td>
-                      <td>{stage?.percentage || 0}%</td>
-                      <td>{stage?.bottleneck ? 'Yes' : 'No'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </>
-    )
-  }
-
-  const renderQualityAnalytics = () => {
-    if (!qualityMetrics || !qualityTrend.length) return <div>Loading quality data...</div>
-    
-    return (
-      <>
-        <div className="kpi-grid">
-          <KPICard
-            title="Pass Rate"
-            value={(qualityMetrics?.passRate?.toFixed(1) || '0.0') + '%'}
-            change={2.3}
-            icon={CheckCircle}
-          />
-          <KPICard
-            title="Fail Rate"
-            value={(qualityMetrics?.failRate?.toFixed(1) || '0.0') + '%'}
-            change={-1.2}
-            icon={Package}
-          />
-          <KPICard
-            title="Rework Rate"
-            value={(qualityMetrics?.reworkRate?.toFixed(1) || '0.0') + '%'}
-            icon={Settings}
-          />
-          <KPICard
-            title="Scrap Rate"
-            value={(qualityMetrics?.scrapRate?.toFixed(1) || '0.0') + '%'}
-            change={-0.8}
-            icon={TrendingUp}
-          />
-        </div>
-
-        <div className="charts-row">
-          <div className="chart-half">
-            <PieChart
-              data={[
-                { name: 'Passed', value: qualityMetrics.passed },
-                { name: 'Failed', value: qualityMetrics.failed },
-                { name: 'Rework', value: qualityMetrics.rework },
-                { name: 'Scrap', value: qualityMetrics.scrap }
-              ]}
-              dataKey="value"
-              nameKey="name"
-              title="Quality Status Distribution"
-              height={350}
-            />
-          </div>
-          <div className="chart-half">
-            <LineChart
-              data={qualityTrend}
-              xKey="date"
-              yKeys={[
-                { dataKey: 'passRate', name: 'Pass Rate' },
-                { dataKey: 'failRate', name: 'Fail Rate' },
-                { dataKey: 'reworkRate', name: 'Rework Rate' }
-              ]}
-              colors={['#43e97b', '#f5576c', '#ffa726']}
-              title="Quality Metrics Trend (Last 30 Days)"
-              valueSuffix="%"
-              height={350}
-            />
-          </div>
-        </div>
-
-        <div className="charts-row">
-          <div className="chart-full">
-            <div className="analytics-card">
-              <h3 className="card-title">Quality Summary</h3>
-              <div className="quality-summary">
-                <div className="quality-stat">
-                  <div className="stat-label">Total Inspected</div>
-                  <div className="stat-value">{qualityMetrics?.totalInspected?.toLocaleString() || '0'}</div>
-                </div>
-                <div className="quality-stat">
-                  <div className="stat-label">Passed</div>
-                  <div className="stat-value text-success">{qualityMetrics?.passed?.toLocaleString() || '0'}</div>
-                </div>
-                <div className="quality-stat">
-                  <div className="stat-label">Failed</div>
-                  <div className="stat-value text-danger">{qualityMetrics?.failed?.toLocaleString() || '0'}</div>
-                </div>
-                <div className="quality-stat">
-                  <div className="stat-label">Rework</div>
-                  <div className="stat-value text-warning">{qualityMetrics?.rework?.toLocaleString() || '0'}</div>
-                </div>
-                <div className="quality-stat">
-                  <div className="stat-label">Scrap</div>
-                  <div className="stat-value text-danger">{qualityMetrics?.scrap?.toLocaleString() || '0'}</div>
-                </div>
+                  </thead>
+                  <tbody>
+                    {lowStock.map((item, i) => (
+                      <tr key={item.productId || i}>
+                        <td>{item.productName || 'N/A'}</td>
+                        <td>{item.category || 'N/A'}</td>
+                        <td style={{ color: item.quantityInStock === 0 ? '#f5576c' : '#2d3748', fontWeight: 600 }}>
+                          {item.quantityInStock}
+                        </td>
+                        <td>{item.reorderLevel}</td>
+                        <td style={{ color: '#f5576c', fontWeight: 600 }}>{item.deficit}</td>
+                        <td>
+                          <span style={{
+                            background: item.alert === 'CRITICAL' ? '#f8d7da' : '#fff3cd',
+                            color: item.alert === 'CRITICAL' ? '#842029' : '#856404',
+                            padding: '2px 10px', borderRadius: '12px',
+                            fontSize: '0.72rem', fontWeight: 700
+                          }}>
+                            {item.alert}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
+        )}
+
+        {/* #16 Fast Moving | #17 Slow Moving */}
+        {(data.fastMovingProducts || []).length < 2 && (data.slowMovingProducts || []).length === 0 && (
+          <div style={{ background: '#fffbeb', border: '1px solid #f6ad55', borderRadius: '8px', padding: '0.75rem 1rem', marginBottom: '1rem', color: '#7b341e', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span>⚠️</span>
+            <span><strong>Limited dataset:</strong> You need at least 2 distinct products with sales data in the last 90 days to split Fast vs Slow moving. Add more sales data to see the comparison.</span>
+          </div>
+        )}
+        <div className="charts-row">
+          <div className="chart-half">
+            <BarChart
+              data={data.fastMovingProducts || []}
+              xKey="productName"
+              yKeys={[{ dataKey: 'totalQuantity', name: 'Units (90d)' }]}
+              colors={['#43e97b']}
+              title="Fast Moving Products (Last 90 Days)"
+              height={400}
+              layout="vertical"
+              onChartClick={handleChartDrillUp}
+            />
+          </div>
+          <div className="chart-half">
+            <BarChart
+              data={data.slowMovingProducts || []}
+              xKey="productName"
+              yKeys={[{ dataKey: 'totalQuantity', name: 'Units (90d)' }]}
+              colors={['#ffa726']}
+              title="Slow Moving Products (Last 90 Days)"
+              height={400}
+              layout="vertical"
+              onChartClick={handleChartDrillUp}
+            />
+          </div>
         </div>
       </>
     )
   }
 
-  const renderDispatchAnalytics = () => {
-    if (!packingStatus.length || !dispatchTimeline.length) return <div>Loading dispatch data...</div>
-    
-    return (
-      <>
-        <div className="kpi-grid">
-          {packingStatus.map((status, index) => (
-            <KPICard
-              key={status?.status || index}
-              title={status?.status || 'N/A'}
-              value={status?.count || 0}
-              icon={status?.status?.includes('Ready') ? Truck : Package}
-            />
-          ))}
-        </div>
-
-        <div className="charts-row">
-          <div className="chart-half">
-            <BarChart
-              data={packingStatus}
-              xKey="status"
-              yKeys={[{ dataKey: 'count', name: 'Orders' }]}
-              colors={['#667eea']}
-              title="Packing & Dispatch Status"
-              height={350}
-            />
-          </div>
-          <div className="chart-half">
-            <BarChart
-              data={[
-                { status: 'Scheduled', count: dispatchTimeline.length },
-                { status: 'On-Time', count: dispatchTimeline.filter(d => d.onTime).length },
-                { status: 'Delayed', count: dispatchTimeline.filter(d => d.delayed).length }
-              ]}
-              xKey="status"
-              yKeys={[{ dataKey: 'count', name: 'Dispatches' }]}
-              colors={['#43e97b']}
-              title="Dispatch Performance"
-              height={350}
-            />
-          </div>
-        </div>
-
-        <div className="charts-row">
-          <div className="chart-full">
-            <div className="analytics-card">
-              <h3 className="card-title">Recent Dispatch Schedule</h3>
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Scheduled</th>
-                    <th>On-Time</th>
-                    <th>Delayed</th>
-                    <th>Performance</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dispatchTimeline.slice(0, 10).map((day, index) => (
-                    <tr key={day?.date || index}>
-                      <td>{day?.date || 'N/A'}</td>
-                      <td>{day?.scheduled || 0}</td>
-                      <td className="text-success">{day?.onTime || 0}</td>
-                      <td className="text-danger">{day?.delayed || 0}</td>
-                      <td>{day?.scheduled ? ((day.onTime / day.scheduled) * 100).toFixed(0) : '0'}%</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </>
-    )
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'sales':     return renderSales()
+      case 'customers': return renderCustomers()
+      case 'inventory': return renderInventory()
+      default:          return renderOverview()
+    }
   }
 
   return (
     <div className="analytics-section-container">
       <div className="analytics-header">
-        <h2>Business Analytics & Insights</h2>
-        <p>Comprehensive manufacturing and business analytics for Tex Weave Impex</p>
+        <h2>Business Analytics &amp; Insights</h2>
+        <p>Dynamic analytics for {getRangeLabel()} with drill-down exploration</p>
       </div>
 
-      {/* Sub-navigation for analytics tabs */}
+      <div className="analytics-filters">
+        <div className="analytics-filter-group">
+          <label>Quick Range</label>
+          <select value={datePreset} onChange={(e) => applyPreset(e.target.value)}>
+            {presets.map(p => (
+              <option key={p.id} value={p.id}>{p.label}</option>
+            ))}
+          </select>
+        </div>
+        <div className="analytics-filter-group">
+          <label>From</label>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => {
+              setDatePreset('custom')
+              setStartDate(e.target.value)
+            }}
+          />
+        </div>
+        <div className="analytics-filter-group">
+          <label>To</label>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => {
+              setDatePreset('custom')
+              setEndDate(e.target.value)
+            }}
+          />
+        </div>
+        <div className="analytics-filter-group">
+          <label>Trend View</label>
+          <select
+            value={trendGranularity}
+            onChange={(e) => {
+              setTrendGranularity(e.target.value)
+              setDrillStack([])
+            }}
+          >
+            <option value="month">Monthly</option>
+            <option value="week">Weekly</option>
+            <option value="day">Daily</option>
+          </select>
+        </div>
+        <div className="analytics-filter-actions">
+          <button
+            type="button"
+            className="analytics-secondary-btn"
+            onClick={() => {
+              const reset = getDefaultDates()
+              setDatePreset('last90')
+              setStartDate(reset.startDate)
+              setEndDate(reset.endDate)
+              setTrendGranularity('month')
+              setDrillStack([])
+              clearSalesDrill()
+            }}
+          >
+            Reset
+          </button>
+          <button
+            type="button"
+            className="analytics-primary-btn"
+            onClick={() => fetchAnalytics()}
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
+
       <div className="analytics-tabs">
-        {analyticsTabs.map(tab => {
+        {tabs.map(tab => {
           const Icon = tab.icon
           return (
             <button
               key={tab.id}
-              className={`tab-button ${analyticsTab === tab.id ? 'active' : ''}`}
-              onClick={() => setAnalyticsTab(tab.id)}
+              className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab.id)}
             >
               <Icon size={18} />
               <span>{tab.label}</span>
@@ -2413,9 +2526,8 @@ const AnalyticsSection = ({
         })}
       </div>
 
-      {/* Analytics content */}
       <div className="analytics-content">
-        {renderAnalyticsContent()}
+        {renderTabContent()}
       </div>
     </div>
   )

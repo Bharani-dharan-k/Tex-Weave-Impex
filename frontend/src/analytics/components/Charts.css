@@ -1,26 +1,83 @@
 .chart-container {
   background: white;
-  border-radius: 8px;
-  padding: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  margin-bottom: 24px;
+  border-radius: 12px;
+  padding: 22px 24px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  margin-bottom: 0;
   font-family: 'Segoe UI', 'Arial', sans-serif;
+  border: 1px solid #f0f0f0;
+  overflow: hidden;
 }
 
 .chart-title {
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 20px;
+  color: #374151;
+  margin-bottom: 18px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  line-height: 1.35;
+}
+
+/* Recharts polish */
+.chart-container .recharts-responsive-container {
+  margin-top: 4px;
+}
+
+.chart-container .recharts-cartesian-grid line {
+  stroke: #e9edf5;
+  stroke-opacity: 0.9;
+}
+
+.chart-container .recharts-cartesian-axis-line,
+.chart-container .recharts-cartesian-axis-tick-line {
+  stroke: #c6cedf;
+}
+
+.chart-container .recharts-cartesian-axis-tick-value,
+.chart-container .recharts-polar-angle-axis-tick-value,
+.chart-container .recharts-radial-bar-axis .recharts-polar-angle-axis-tick-value {
+  fill: #55627a;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.chart-container .recharts-default-legend {
+  padding-top: 8px !important;
+}
+
+.chart-container .recharts-legend-item-text {
+  color: #4b5565 !important;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.chart-container .recharts-line-curve {
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.04));
+}
+
+.chart-container .recharts-dot,
+.chart-container .recharts-active-dot,
+.chart-container .recharts-bar-rectangle,
+.chart-container .recharts-pie-sector {
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.chart-container .recharts-pie-label-text {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.chart-container .recharts-pie-label-line {
+  stroke: #98a4bc;
 }
 
 .custom-tooltip {
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  padding: 12px;
+  padding: 12px 14px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -31,9 +88,28 @@
 }
 
 .custom-tooltip p {
-  margin: 4px 0;
+  margin: 5px 0;
   font-size: 13px;
   color: #666;
+}
+
+@media (max-width: 768px) {
+  .chart-container {
+    padding: 16px 14px;
+    border-radius: 10px;
+  }
+
+  .chart-title {
+    margin-bottom: 12px;
+    font-size: 11px;
+    letter-spacing: 0.6px;
+  }
+
+  .chart-container .recharts-cartesian-axis-tick-value,
+  .chart-container .recharts-pie-label-text,
+  .chart-container .recharts-legend-item-text {
+    font-size: 11px;
+  }
 }
 
 /* Data Table Styles */
@@ -43,7 +119,7 @@
   background: white;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .data-table thead {
@@ -52,16 +128,16 @@
 }
 
 .data-table th {
-  padding: 16px;
+  padding: 14px 16px;
   text-align: left;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .data-table td {
-  padding: 14px 16px;
+  padding: 12px 16px;
   border-bottom: 1px solid #f0f0f0;
   font-size: 14px;
   color: #333;

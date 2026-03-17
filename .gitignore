@@ -33,3 +33,6 @@ coverage/
 # Misc
 *.tsbuildinfo
 .cache/
+
+# Google Service Account Keys (sensitive!)
+*service-account*.json

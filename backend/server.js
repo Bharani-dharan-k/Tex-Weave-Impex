@@ -1,6 +1,8 @@
+// dotenv/config must be the FIRST import — it loads .env at module evaluation time
+// (In ES modules, all imports are hoisted, so dotenv.config() between imports won't work)
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
@@ -18,13 +20,12 @@ import reviewRoutes from "./routes/reviewRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
 import customerAnalyticsRoutes from "./routes/customerAnalyticsRoutes.js";
 import productViewRoutes from "./routes/productViewRoutes.js";
-
-dotenv.config();
-
-const app = express();
+import dashboardAnalyticsRoutes from "./routes/dashboardAnalyticsRoutes.js";
 
 // Connect to MongoDB
 connectDB();
+
+const app = express();
 
 // Middleware
 app.use(cors());
@@ -50,6 +51,7 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/customer/analytics", customerAnalyticsRoutes);
 app.use("/api/product-views", productViewRoutes);
+app.use("/api/analytics/dashboard", dashboardAnalyticsRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {

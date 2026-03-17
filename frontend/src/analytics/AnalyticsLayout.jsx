@@ -4,8 +4,8 @@ import './Analytics.css';
 
 const AnalyticsLayout = () => {
   return (
-    <div style={{ background: '#f5f7fa', minHeight: '100vh' }}>
-      <nav className="analytics-nav" style={{ margin: '0 24px', paddingTop: '24px' }}>
+    <div style={{ background: '#f5f7fa', minHeight: '100vh', overflow: 'hidden' }}>
+      <nav className="analytics-nav" style={{ margin: '0 24px', paddingTop: '20px' }}>
         <ul>
           <li>
             <NavLink to="/analytics" end>

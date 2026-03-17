@@ -1,0 +1,51 @@
+productId,name,category,costPrice,sellingPrice,reorderLevel,description,unit
+PROD001,Premium Cotton Poplin,Cotton,520,780,15,High-quality cotton poplin fabric suitable for shirts and dresses,meters
+PROD002,Cotton Canvas Heavy,Cotton,600,920,12,Heavy-duty cotton canvas for bags and upholstery,meters
+PROD003,Cotton Cambric,Cotton,380,580,20,Soft cotton cambric ideal for summer garments,meters
+PROD004,Cotton Voile,Cotton,340,520,18,Lightweight sheer cotton voile for curtains and scarves,meters
+PROD005,Cotton Twill Drill,Cotton,480,740,14,Sturdy cotton twill drill for workwear and uniforms,meters
+PROD006,Cotton Denim 12oz,Cotton,550,850,20,Heavy-duty 12oz indigo denim for jeans,meters
+PROD007,Cotton Flannel,Cotton,420,650,16,Brushed cotton flannel for winter shirts and bedding,meters
+PROD008,Polyester Crepe,Polyester,360,560,15,Smooth polyester crepe for formal wear,meters
+PROD009,Polyester Satin,Polyester,450,700,10,Glossy polyester satin for linings and evening wear,meters
+PROD010,Polyester Chiffon,Polyester,300,480,12,Sheer polyester chiffon for dupattas and scarves,meters
+PROD011,Polyester Taffeta,Polyester,320,500,14,Crisp polyester taffeta for jackets and decor,meters
+PROD012,Polyester Mesh,Polyester,280,440,10,Breathable polyester mesh for sportswear,meters
+PROD013,Polyester Fleece,Polyester,400,620,18,Warm polyester fleece for jackets and blankets,meters
+PROD014,Silk Dupioni,Silk,1400,2100,5,Luxurious silk dupioni with natural slubs for bridal wear,meters
+PROD015,Silk Charmeuse,Silk,1200,1850,6,Smooth silk charmeuse for blouses and lingerie,meters
+PROD016,Silk Organza,Silk,1100,1700,5,Sheer silk organza for overlays and stiffening,meters
+PROD017,Silk Crepe de Chine,Silk,1300,2000,4,Elegant silk crepe de chine for dresses,meters
+PROD018,Raw Silk Noil,Silk,900,1400,7,Textured raw silk noil for casual wear,meters
+PROD019,Wool Tweed,Wool,850,1300,8,Classic herringbone wool tweed for blazers,meters
+PROD020,Wool Flannel,Wool,780,1200,9,Soft wool flannel for trousers and suits,meters
+PROD021,Merino Wool Jersey,Wool,950,1450,6,Fine merino wool jersey for knitwear,kg
+PROD022,Wool Cashmere Blend,Wool,1600,2400,4,Premium wool-cashmere blend for overcoats,meters
+PROD023,Wool Gabardine,Wool,820,1250,8,Tightly woven wool gabardine for suits,meters
+PROD024,Linen Plain Weave,Linen,650,980,10,Classic linen plain weave for summer shirts,meters
+PROD025,Linen Chambray,Linen,580,880,12,Linen chambray with soft hand for casual wear,meters
+PROD026,Linen Canvas,Linen,700,1050,8,Heavy linen canvas for tote bags and decor,meters
+PROD027,Linen Slub,Linen,620,950,10,Natural slub linen for curtains and table linens,meters
+PROD028,Poly-Cotton Blend 65/35,Blended,350,540,25,Durable poly-cotton blend for uniforms and workwear,meters
+PROD029,Poly-Viscose Suiting,Blended,480,740,15,Poly-viscose suiting fabric for formal trousers,meters
+PROD030,Cotton-Linen Blend,Blended,500,770,12,Cotton-linen blend for summer blazers,meters
+PROD031,Silk-Cotton Blend,Blended,750,1150,8,Silk-cotton blend combining sheen and comfort,meters
+PROD032,Wool-Polyester Blend,Blended,620,960,10,Affordable wool-polyester blend for everyday suits,meters
+PROD033,Terry Cotton Towelling,Cotton,440,680,20,Absorbent terry cotton for towels and robes,kg
+PROD034,Bamboo Rayon,Other,420,650,14,Eco-friendly bamboo rayon for activewear,meters
+PROD035,Jute Burlap,Other,180,300,30,Coarse jute burlap for packaging and decor,meters
+PROD036,Nylon Ripstop,Other,380,590,12,Durable nylon ripstop for bags and outdoor gear,meters
+PROD037,Velvet Polyester,Polyester,700,1080,6,Plush polyester velvet for upholstery and dresses,meters
+PROD038,Muslin Cotton,Cotton,260,420,25,Fine muslin cotton for swaddling and cheese-making,meters
+PROD039,Lycra Spandex,Other,500,780,10,4-way stretch lycra spandex for sportswear,meters
+PROD040,Viscose Rayon,Other,340,530,18,Soft viscose rayon for dresses and blouses,meters
+PROD041,Corduroy Cotton,Cotton,480,740,14,8-wale cotton corduroy for trousers and jackets,meters
+PROD042,Silk Brocade,Silk,1800,2700,3,Rich silk brocade with metallic thread for sarees,meters
+PROD043,Poly-Linen Blend,Blended,420,650,12,Easy-care poly-linen blend for curtains,meters
+PROD044,Cotton Sateen,Cotton,460,710,15,Lustrous cotton sateen for bedsheets and dresses,meters
+PROD045,Hemp Fabric,Other,550,850,10,Sustainable hemp fabric for bags and casual wear,meters
+PROD046,Wool Melton,Wool,900,1380,6,Dense wool melton for coats and jackets,meters
+PROD047,Polyester Microfiber,Polyester,250,400,20,Ultra-fine polyester microfiber for cleaning and apparel,meters
+PROD048,Linen Jacquard,Linen,750,1130,7,Patterned linen jacquard for table runners and decor,meters
+PROD049,Cotton Interlock Knit,Cotton,380,590,18,Double-knit cotton interlock for baby wear,kg
+PROD050,Silk Habotai,Silk,1000,1550,5,Lightweight silk habotai for linings and scarves,meters

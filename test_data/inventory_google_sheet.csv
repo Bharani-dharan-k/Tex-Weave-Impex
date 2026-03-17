@@ -1,0 +1,51 @@
+productId,productName,quantityInStock,reorderLevel,maxStockLevel,warehouseLocation,lastRestockDate
+PROD001,Premium Cotton Poplin,450,15,1200,Main Warehouse,2026-02-20
+PROD002,Cotton Canvas Heavy,320,12,800,Main Warehouse,2026-02-15
+PROD003,Cotton Cambric,380,20,1000,Main Warehouse,2026-02-25
+PROD004,Cotton Voile,290,18,900,Main Warehouse,2026-02-18
+PROD005,Cotton Twill Drill,260,14,800,Main Warehouse,2026-02-10
+PROD006,Cotton Denim 12oz,520,20,1500,Main Warehouse,2026-03-01
+PROD007,Cotton Flannel,180,16,700,Main Warehouse,2026-01-20
+PROD008,Polyester Crepe,310,15,800,Main Warehouse,2026-02-12
+PROD009,Polyester Satin,240,10,600,Main Warehouse,2026-02-08
+PROD010,Polyester Chiffon,350,12,900,Main Warehouse,2026-02-22
+PROD011,Polyester Taffeta,275,14,700,Main Warehouse,2026-02-05
+PROD012,Polyester Mesh,200,10,600,Main Warehouse,2026-01-28
+PROD013,Polyester Fleece,155,18,500,Main Warehouse,2026-02-14
+PROD014,Silk Dupioni,65,5,200,Premium Warehouse,2026-02-10
+PROD015,Silk Charmeuse,48,6,180,Premium Warehouse,2026-02-05
+PROD016,Silk Organza,35,5,150,Premium Warehouse,2026-01-25
+PROD017,Silk Crepe de Chine,42,4,160,Premium Warehouse,2026-02-01
+PROD018,Raw Silk Noil,70,7,250,Premium Warehouse,2026-02-15
+PROD019,Wool Tweed,90,8,300,Warehouse B,2026-02-08
+PROD020,Wool Flannel,105,9,350,Warehouse B,2026-02-12
+PROD021,Merino Wool Jersey,58,6,200,Warehouse B,2026-01-30
+PROD022,Wool Cashmere Blend,30,4,120,Premium Warehouse,2026-02-18
+PROD023,Wool Gabardine,85,8,280,Warehouse B,2026-02-20
+PROD024,Linen Plain Weave,145,10,500,Main Warehouse,2026-02-17
+PROD025,Linen Chambray,120,12,400,Main Warehouse,2026-02-10
+PROD026,Linen Canvas,95,8,350,Main Warehouse,2026-02-22
+PROD027,Linen Slub,110,10,380,Main Warehouse,2026-02-14
+PROD028,Poly-Cotton Blend 65/35,680,25,2000,Main Warehouse,2026-03-05
+PROD029,Poly-Viscose Suiting,175,15,500,Main Warehouse,2026-02-08
+PROD030,Cotton-Linen Blend,140,12,450,Main Warehouse,2026-02-20
+PROD031,Silk-Cotton Blend,72,8,250,Premium Warehouse,2026-02-12
+PROD032,Wool-Polyester Blend,100,10,350,Warehouse B,2026-02-18
+PROD033,Terry Cotton Towelling,420,20,1200,Main Warehouse,2026-03-02
+PROD034,Bamboo Rayon,130,14,400,Main Warehouse,2026-02-15
+PROD035,Jute Burlap,850,30,2500,Warehouse B,2026-03-01
+PROD036,Nylon Ripstop,110,12,350,Main Warehouse,2026-02-10
+PROD037,Velvet Polyester,55,6,200,Premium Warehouse,2026-01-28
+PROD038,Muslin Cotton,480,25,1500,Main Warehouse,2026-03-03
+PROD039,Lycra Spandex,95,10,300,Main Warehouse,2026-02-05
+PROD040,Viscose Rayon,220,18,600,Main Warehouse,2026-02-22
+PROD041,Corduroy Cotton,115,14,400,Main Warehouse,2026-02-14
+PROD042,Silk Brocade,22,3,80,Premium Warehouse,2026-01-20
+PROD043,Poly-Linen Blend,150,12,450,Main Warehouse,2026-02-25
+PROD044,Cotton Sateen,185,15,550,Main Warehouse,2026-02-18
+PROD045,Hemp Fabric,80,10,300,Warehouse B,2026-02-08
+PROD046,Wool Melton,45,6,180,Warehouse B,2026-01-25
+PROD047,Polyester Microfiber,530,20,1500,Main Warehouse,2026-03-05
+PROD048,Linen Jacquard,65,7,220,Premium Warehouse,2026-02-10
+PROD049,Cotton Interlock Knit,240,18,700,Main Warehouse,2026-02-28
+PROD050,Silk Habotai,52,5,180,Premium Warehouse,2026-02-15

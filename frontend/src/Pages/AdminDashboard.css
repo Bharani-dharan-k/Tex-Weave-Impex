@@ -176,9 +176,11 @@
 /* ==================== MAIN CONTENT ==================== */
 .admin-content {
   flex: 1;
-  padding: 2rem;
+  padding: 1.5rem 2rem;
   overflow-y: auto;
+  overflow-x: hidden;
   background: #f5f7fa;
+  min-width: 0;
 }
 
 /* ==================== DASHBOARD HOME ==================== */
@@ -1127,11 +1129,27 @@
   
   .analytics-tabs {
     overflow-x: auto;
-    padding: 1rem;
+    padding: 0.5rem;
+    gap: 0.25rem;
   }
 
   .tab-button {
-    min-width: 120px;
+    min-width: auto;
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .analytics-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .charts-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .kpi-grid {
+    gap: 12px;
   }
 }
 
@@ -1157,30 +1175,39 @@
 /* ==================== ANALYTICS SECTION ==================== */
 .analytics-section-container {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding-bottom: 0.75rem;
 }
 
 .analytics-header {
   margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid #e5e7eb;
 }
 
 .analytics-header h2 {
-  font-size: 2rem;
+  font-size: 1.75rem;
   color: #1f2937;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.4rem 0;
   font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .analytics-header p {
   color: #6b7280;
-  font-size: 1rem;
+  font-size: 0.95rem;
   margin: 0;
 }
 
 .analytics-tabs {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
-  padding: 0.5rem;
+  gap: 0.65rem;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem;
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -1189,11 +1216,107 @@
   flex-wrap: wrap;
 }
 
+.analytics-filters {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(150px, 1fr));
+  gap: 0.9rem;
+  margin-bottom: 1.15rem;
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.analytics-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.42rem;
+}
+
+.analytics-filter-group label {
+  font-size: 0.76rem;
+  color: #4b5563;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.analytics-filter-group input,
+.analytics-filter-group select {
+  height: 42px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  padding: 0 0.75rem;
+  font-size: 0.88rem;
+  color: #111827;
+  background: #f9fafb;
+}
+
+.analytics-filter-actions {
+  display: flex;
+  align-items: end;
+  gap: 0.6rem;
+  justify-content: flex-end;
+}
+
+.analytics-primary-btn,
+.analytics-secondary-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.66rem 1rem;
+  min-height: 40px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.analytics-primary-btn {
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+  color: white;
+  box-shadow: 0 3px 10px rgba(59, 130, 246, 0.28);
+}
+
+.analytics-secondary-btn {
+  background: #eef2ff;
+  color: #3730a3;
+  border: 1px solid #dbe2ff;
+}
+
+.analytics-primary-btn:hover,
+.analytics-secondary-btn:hover {
+  transform: translateY(-1px);
+}
+
+.analytics-secondary-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.analytics-drill-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.35rem;
+  padding: 0.75rem 0.9rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  color: #4b5563;
+  font-size: 0.86rem;
+}
+
+.analytics-drill-controls span {
+  line-height: 1.45;
+}
+
 .tab-button {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
+  padding: 0.75rem 1.3rem;
   background: transparent;
   border: none;
   border-radius: 8px;
@@ -1214,10 +1337,22 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.35);
 }
 
 .analytics-content {
   width: 100%;
+  max-width: 100%;
+}
+
+.analytics-content > :first-child {
+  margin-top: 0.75rem;
+}
+
+.analytics-content .kpi-grid {
+  margin-top: 0.75rem;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
 }
 
 .loading-state {
@@ -1309,13 +1444,14 @@
 /* ==================== CHART ROWS ==================== */
 .charts-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.35rem;
+  margin-bottom: 1.4rem;
 }
 
 .chart-half {
   min-width: 0;
+  overflow: hidden;
 }
 
 .chart-full {
@@ -1326,10 +1462,79 @@
   .charts-row {
     grid-template-columns: 1fr;
   }
+
+  .analytics-filters {
+    grid-template-columns: repeat(2, minmax(160px, 1fr));
+    gap: 0.8rem;
+  }
   
   .chart-full {
     grid-column: 1;
   }
+}
+
+@media (max-width: 768px) {
+  .analytics-header {
+    margin-bottom: 1.35rem;
+  }
+
+  .analytics-tabs {
+    padding: 0.55rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .tab-button {
+    width: 100%;
+    justify-content: center;
+    padding: 0.7rem 1rem;
+  }
+
+  .analytics-filters {
+    grid-template-columns: 1fr;
+    padding: 0.85rem;
+    margin-bottom: 0.95rem;
+  }
+
+  .analytics-filter-actions {
+    justify-content: stretch;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .analytics-primary-btn,
+  .analytics-secondary-btn {
+    width: 100%;
+  }
+
+  .analytics-drill-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.7rem 0.75rem;
+  }
+
+  .analytics-content .kpi-grid {
+    margin-top: 0.5rem;
+    gap: 0.85rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .analytics-content > :first-child {
+    margin-top: 0.5rem;
+  }
+
+  .charts-row {
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* Analytics Card */
+.analytics-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px 22px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0f0f0;
 }
 /* ==================== CHAT PAGE STYLES ==================== */
 .admin-chat-page {

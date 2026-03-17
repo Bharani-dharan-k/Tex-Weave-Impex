@@ -1,8 +1,71 @@
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
+import mongoose from 'mongoose';
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import User from '../models/User.js';
+import Sales from '../models/Sales.js';
+
+const resolveRegionFromAddress = (address = {}) => {
+  const state = String(address?.state || '').toLowerCase();
+  if (!state) return 'Central';
+
+  if (['delhi', 'haryana', 'punjab', 'uttar pradesh', 'uttarakhand', 'himachal pradesh', 'jammu and kashmir', 'ladakh', 'chandigarh', 'rajasthan'].includes(state)) {
+    return 'North';
+  }
+  if (['tamil nadu', 'karnataka', 'kerala', 'andhra pradesh', 'telangana', 'puducherry'].includes(state)) {
+    return 'South';
+  }
+  if (['west bengal', 'odisha', 'bihar', 'jharkhand', 'assam', 'sikkim', 'meghalaya', 'tripura', 'manipur', 'mizoram', 'nagaland', 'arunachal pradesh'].includes(state)) {
+    return 'East';
+  }
+  if (['maharashtra', 'gujarat', 'goa', 'dadra and nagar haveli and daman and diu'].includes(state)) {
+    return 'West';
+  }
+
+  return 'Central';
+};
+
+const syncOrderToSales = async (order) => {
+  if (!order || order.paymentStatus !== 'completed' || !Array.isArray(order.items) || order.items.length === 0) {
+    return;
+  }
+
+  const customerName = order.customerInfo?.name || order.customerInfo?.companyName || 'Customer';
+  const region = resolveRegionFromAddress(order.shippingAddress);
+  const saleDate = order.createdAt || new Date();
+
+  await Promise.all(order.items.map((item, index) => {
+    const quantity = Number(item.quantity || 0);
+    const unitPrice = Number(item.pricePerUnit || 0);
+    const totalAmount = Number(item.totalPrice || (quantity * unitPrice));
+
+    if (!item.productId || quantity <= 0 || totalAmount < 0) {
+      return Promise.resolve();
+    }
+
+    const invoiceId = `${order.orderId}-${String(index + 1).padStart(2, '0')}`.toUpperCase();
+
+    return Sales.findOneAndUpdate(
+      { invoiceId },
+      {
+        invoiceId,
+        productId: String(item.productId).trim().toUpperCase(),
+        productName: item.productName || '',
+        quantitySold: quantity,
+        unitPrice,
+        totalAmount,
+        costPrice: 0,
+        saleDate,
+        customerName,
+        region,
+        paymentStatus: 'Paid',
+        salesPerson: 'Online'
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+  }));
+};
 
 // Initialize Razorpay
 let razorpay;
@@ -146,9 +209,19 @@ export const verifyPayment = async (req, res) => {
       });
     }
 
-    // Update order
-    const order = await Order.findByIdAndUpdate(
-      orderId,
+    // Update order by either Mongo _id or business orderId (ORD-...), scoped by Razorpay order id
+    const orderQuery = { razorpayOrderId };
+
+    if (orderId) {
+      if (mongoose.Types.ObjectId.isValid(orderId)) {
+        orderQuery.$or = [{ _id: orderId }, { orderId }];
+      } else {
+        orderQuery.orderId = orderId;
+      }
+    }
+
+    const order = await Order.findOneAndUpdate(
+      orderQuery,
       {
         paymentStatus: 'completed',
         razorpayPaymentId,
@@ -161,6 +234,8 @@ export const verifyPayment = async (req, res) => {
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
+
+    await syncOrderToSales(order);
 
     res.status(200).json({
       success: true,
