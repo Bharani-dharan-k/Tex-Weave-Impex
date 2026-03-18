@@ -1,4 +1,4 @@
-import axios from '../utils/axiosConfig';
+import axios, { API_BASE_URL } from '../utils/axiosConfig';
 
 // Sales Analytics Services
 export const getSalesOverview = async (startDate, endDate) => {
@@ -230,17 +230,17 @@ export const downloadSalesReport = (startDate, endDate) => {
     params.append('startDate', startDate);
     params.append('endDate', endDate);
   }
-  window.open(`/api/reports/sales?${params.toString()}`, '_blank');
+  window.open(`${API_BASE_URL}/api/reports/sales?${params.toString()}`, '_blank');
 };
 
 export const downloadInventoryReport = (status) => {
   const params = new URLSearchParams();
   if (status) params.append('status', status);
-  window.open(`/api/reports/inventory?${params.toString()}`, '_blank');
+  window.open(`${API_BASE_URL}/api/reports/inventory?${params.toString()}`, '_blank');
 };
 
 export const downloadSlowStockReport = (days = 90) => {
-  window.open(`/api/reports/slow-stock?days=${days}`, '_blank');
+  window.open(`${API_BASE_URL}/api/reports/slow-stock?days=${days}`, '_blank');
 };
 
 export const downloadProfitabilityReport = (startDate, endDate) => {
@@ -249,7 +249,7 @@ export const downloadProfitabilityReport = (startDate, endDate) => {
     params.append('startDate', startDate);
     params.append('endDate', endDate);
   }
-  window.open(`/api/reports/profitability?${params.toString()}`, '_blank');
+  window.open(`${API_BASE_URL}/api/reports/profitability?${params.toString()}`, '_blank');
 };
 
 export const downloadComprehensiveReport = (startDate, endDate) => {
@@ -258,5 +258,5 @@ export const downloadComprehensiveReport = (startDate, endDate) => {
     params.append('startDate', startDate);
     params.append('endDate', endDate);
   }
-  window.open(`/api/reports/comprehensive?${params.toString()}`, '_blank');
+  window.open(`${API_BASE_URL}/api/reports/comprehensive?${params.toString()}`, '_blank');
 };

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../utils/axiosConfig';
 import './Reports.css';
 
 const Reports = () => {
@@ -24,7 +25,7 @@ const Reports = () => {
       params.append('startDate', dateRange.startDate);
       params.append('endDate', dateRange.endDate);
     }
-    window.open(`https://tex-weave-impex.onrender.com/api/reports/sales?${params.toString()}`, '_blank');
+    window.open(`${API_BASE_URL}/api/reports/sales?${params.toString()}`, '_blank');
   };
 
   const downloadInventoryReport = () => {
@@ -32,11 +33,11 @@ const Reports = () => {
     if (selectedStatus && selectedStatus !== 'all') {
       params.append('status', selectedStatus);
     }
-    window.open(`https://tex-weave-impex.onrender.com/api/reports/inventory?${params.toString()}`, '_blank');
+    window.open(`${API_BASE_URL}/api/reports/inventory?${params.toString()}`, '_blank');
   };
 
   const downloadSlowStockReport = () => {
-    window.open(`https://tex-weave-impex.onrender.com/api/reports/slow-stock?days=${slowStockDays}`, '_blank');
+    window.open(`${API_BASE_URL}/api/reports/slow-stock?days=${slowStockDays}`, '_blank');
   };
 
   const downloadProfitabilityReport = () => {
@@ -45,7 +46,7 @@ const Reports = () => {
       params.append('startDate', dateRange.startDate);
       params.append('endDate', dateRange.endDate);
     }
-    window.open(`https://tex-weave-impex.onrender.com/api/reports/profitability?${params.toString()}`, '_blank');
+    window.open(`${API_BASE_URL}/api/reports/profitability?${params.toString()}`, '_blank');
   };
 
   const downloadComprehensiveReport = () => {
@@ -54,7 +55,7 @@ const Reports = () => {
       params.append('startDate', dateRange.startDate);
       params.append('endDate', dateRange.endDate);
     }
-    window.open(`https://tex-weave-impex.onrender.com/api/reports/comprehensive?${params.toString()}`, '_blank');
+    window.open(`${API_BASE_URL}/api/reports/comprehensive?${params.toString()}`, '_blank');
   };
 
   return (

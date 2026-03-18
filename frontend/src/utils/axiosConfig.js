@@ -1,8 +1,10 @@
 import axios from 'axios';
 
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://tex-weave-impex.onrender.com';
+
 // Create axios instance with base URL
 const axiosInstance = axios.create({
-  baseURL: 'https://tex-weave-impex.onrender.com',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
