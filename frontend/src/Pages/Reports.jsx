@@ -24,7 +24,7 @@ const Reports = () => {
       params.append('startDate', dateRange.startDate);
       params.append('endDate', dateRange.endDate);
     }
-    window.open(`http://localhost:5000/api/reports/sales?${params.toString()}`, '_blank');
+    window.open(`https://tex-weave-impex.onrender.com/api/reports/sales?${params.toString()}`, '_blank');
   };
 
   const downloadInventoryReport = () => {
@@ -32,11 +32,11 @@ const Reports = () => {
     if (selectedStatus && selectedStatus !== 'all') {
       params.append('status', selectedStatus);
     }
-    window.open(`http://localhost:5000/api/reports/inventory?${params.toString()}`, '_blank');
+    window.open(`https://tex-weave-impex.onrender.com/api/reports/inventory?${params.toString()}`, '_blank');
   };
 
   const downloadSlowStockReport = () => {
-    window.open(`http://localhost:5000/api/reports/slow-stock?days=${slowStockDays}`, '_blank');
+    window.open(`https://tex-weave-impex.onrender.com/api/reports/slow-stock?days=${slowStockDays}`, '_blank');
   };
 
   const downloadProfitabilityReport = () => {
@@ -45,7 +45,7 @@ const Reports = () => {
       params.append('startDate', dateRange.startDate);
       params.append('endDate', dateRange.endDate);
     }
-    window.open(`http://localhost:5000/api/reports/profitability?${params.toString()}`, '_blank');
+    window.open(`https://tex-weave-impex.onrender.com/api/reports/profitability?${params.toString()}`, '_blank');
   };
 
   const downloadComprehensiveReport = () => {
@@ -54,7 +54,7 @@ const Reports = () => {
       params.append('startDate', dateRange.startDate);
       params.append('endDate', dateRange.endDate);
     }
-    window.open(`http://localhost:5000/api/reports/comprehensive?${params.toString()}`, '_blank');
+    window.open(`https://tex-weave-impex.onrender.com/api/reports/comprehensive?${params.toString()}`, '_blank');
   };
 
   return (
