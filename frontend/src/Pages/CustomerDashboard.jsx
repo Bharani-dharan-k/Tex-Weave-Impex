@@ -857,7 +857,7 @@ const CustomerDashboard = ({ user, onLogout }) => {
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
         <div className="sidebar-header">
-          <h2>Shop</h2>
+          <h2>Tex Weave Impex </h2>
           {/* <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button> */}
