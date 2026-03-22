@@ -993,14 +993,88 @@
 }
 
 /* ========== RESPONSIVE ========== */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 100px;
+  }
+
+  .sidebar-header h2 {
+    font-size: 18px;
+  }
+
+  .nav-text {
+    font-size: 12px;
+  }
+
+  .main-content {
+    margin-left: 100px;
+  }
+
+  .page-content {
+    padding: 25px;
+  }
+
+  .page-title {
+    font-size: 26px;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .modal-content {
+    max-width: 90%;
+  }
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    width: 90px;
+  }
+
+  .nav-text {
+    font-size: 11px;
+  }
+
+  .main-content {
+    margin-left: 90px;
+  }
+
+  .page-content {
+    padding: 20px;
+  }
+
+  .page-title {
+    font-size: 24px;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+
+  .modal-content {
+    width: 85%;
+  }
+}
+
 @media (max-width: 768px) {
   .sidebar {
     width: 80px;
   }
 
+  .sidebar-header {
+    padding: 16px 12px;
+  }
+
   .sidebar-header h2,
   .nav-text {
     display: none;
+  }
+
+  .nav-icon {
+    font-size: 20px;
+    min-width: 20px;
   }
 
   .main-content {
@@ -1009,10 +1083,12 @@
 
   .menu-toggle {
     display: block;
+    width: 32px;
+    height: 32px;
   }
 
   .page-title {
-    font-size: 22px;
+    font-size: 20px;
   }
 
   .user-info-nav {
@@ -1020,52 +1096,26 @@
   }
 
   .page-content {
-    padding: 20px;
+    padding: 16px;
   }
 
   .welcome-banner {
-    padding: 32px 24px;
+    padding: 24px 16px;
   }
 
   .welcome-banner h1 {
-    font-size: 24px;
+    font-size: 20px;
+    margin-bottom: 8px;
   }
 
   .quick-stats {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 20px;
-  }
-
-  .product-image-placeholder {
-    height: 220px;
-  }
-
-  .modal-content {
-    padding: 24px;
-  }
-}
-
-@media (max-width: 480px) {
-  .main-content {
-    margin-left: 0;
-  }
-
-  .sidebar {
-    transform: translateX(-100%);
-  }
-
-  .sidebar.open {
-    transform: translateX(0);
-  }
-
-  .products-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 16px;
-    padding: 2px;
   }
 
   .product-image-placeholder {
@@ -1073,19 +1123,714 @@
   }
 
   .product-info {
-    padding: 20px;
+    padding: 12px;
   }
 
   .product-name {
-    font-size: 16px;
+    font-size: 14px;
+    margin-bottom: 8px;
   }
 
   .product-price {
-    font-size: 22px;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .modal-content {
+    width: 90%;
+    padding: 20px;
+  }
+
+  .modal-header {
+    padding: 16px;
+  }
+
+  .modal-header h2 {
+    font-size: 18px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .modal-footer {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .modal-footer-section {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .btn-add-to-cart,
+  .btn-contact,
+  .btn-inquiry,
+  .btn-write-review {
+    flex: 1;
+    min-width: 110px;
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .filter-section {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .filter-group {
+    width: 100%;
+  }
+
+  .filter-group input,
+  .filter-group select {
+    width: 100%;
+  }
+
+  .cart-item {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cart-item-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .cart-footer {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .order-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .order-status-badges {
+    justify-content: flex-start;
+  }
+
+  .order-item {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .order-footer {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .contact-info-section {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-content {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .sidebar {
+    width: 70px;
+  }
+
+  .nav-icon {
+    font-size: 18px;
+  }
+
+  .main-content {
+    margin-left: 70px;
+  }
+
+  .page-content {
+    padding: 12px;
+  }
+
+  .page-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .welcome-banner {
+    padding: 16px 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+
+  .welcome-banner h1 {
+    font-size: 18px;
+  }
+
+  .quick-stats {
+    gap: 10px;
+  }
+
+  .stat-item {
+    padding: 16px 12px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+  }
+
+  .product-card {
+    border-radius: 8px;
+  }
+
+  .product-image-placeholder {
+    height: 160px;
+  }
+
+  .product-info {
+    padding: 10px;
+  }
+
+  .product-name {
+    font-size: 13px;
+  }
+
+  .product-price {
+    font-size: 16px;
+  }
+
+  .modal-content {
+    width: 95%;
+    padding: 16px;
+  }
+
+  .modal-header {
+    padding: 12px;
+  }
+
+  .modal-header h2 {
+    font-size: 16px;
+  }
+
+  .modal-body {
+    padding: 12px;
+  }
+
+  .modal-footer {
+    gap: 6px;
+  }
+
+  .modal-footer-section {
+    gap: 6px;
+  }
+
+  .btn-add-to-cart,
+  .btn-contact,
+  .btn-inquiry,
+  .btn-write-review {
+    padding: 8px;
+    font-size: 12px;
+    min-width: 90px;
+  }
+
+  .form-group {
+    gap: 4px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  .cart-summary {
+    width: 100%;
+  }
+
+  .btn-checkout {
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .order-card {
+    padding: 12px;
+  }
+
+  .order-header h4 {
+    font-size: 14px;
+  }
+
+  .order-date {
+    font-size: 12px;
+  }
+
+  .order-status-badges {
+    gap: 4px;
+  }
+
+  .status-badge {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+
+  .order-item {
+    padding: 8px;
+    margin-bottom: 4px;
+  }
+
+  .order-item span:first-child {
+    font-size: 13px;
+  }
+
+  .total-amount {
+    font-size: 18px;
+  }
+
+  .contact-card {
+    padding: 16px;
+  }
+
+  .contact-icon {
+    font-size: 32px;
+  }
+
+  .contact-card h3 {
+    font-size: 14px;
+  }
+
+  .contact-card p {
+    font-size: 12px;
+  }
+
+  .profile-picture-display {
+    width: 120px;
+    height: 120px;
+  }
+
+  .profile-header-actions {
+    padding: 12px;
+  }
+
+  .btn-edit-profile,
+  .btn-save-profile,
+  .btn-cancel-profile {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+
+  .profile-section {
+    padding: 12px;
+  }
+
+  .profile-section h3 {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    width: 0;
+    transform: translateX(-100%);
+    position: fixed;
+    height: 100vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+
+  .page-content {
+    padding: 10px;
+  }
+
+  .page-title {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  .welcome-banner {
+    padding: 12px 10px;
+  }
+
+  .welcome-banner h1 {
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+
+  .quick-stats {
+    gap: 8px;
+  }
+
+  .stat-item {
+    padding: 12px 10px;
+  }
+
+  .stat-value {
+    font-size: 20px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+  }
+
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .product-image-placeholder {
+    height: 200px;
+  }
+
+  .product-info {
+    padding: 12px;
+  }
+
+  .product-name {
+    font-size: 14px;
+  }
+
+  .product-price {
+    font-size: 18px;
+  }
+
+  .product-rating {
+    font-size: 12px;
+  }
+
+  .modal-content {
+    width: 98%;
+    padding: 12px;
+    margin: 30% auto;
+  }
+
+  .modal-header {
+    padding: 10px;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .modal-header h2 {
+    font-size: 14px;
+  }
+
+  .modal-body {
+    padding: 10px;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px;
   }
 
   .modal-footer-section {
     flex-direction: column;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .btn-add-to-cart,
+  .btn-contact,
+  .btn-inquiry,
+  .btn-write-review,
+  .btn-remove,
+  .btn-cancel-order {
+    width: 100%;
+    padding: 10px;
+    font-size: 12px;
+  }
+
+  .form-group {
+    gap: 4px;
+  }
+
+  .form-group label {
+    font-size: 12px;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 8px;
+    font-size: 14px;
+    height: 40px;
+  }
+
+  .btn-checkout {
+    width: 100%;
+    padding: 12px;
+    font-size: 13px;
+  }
+
+  .cart-item {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .quantity-controls {
+    gap: 4px;
+  }
+
+  .quantity-controls button {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .cart-item-total {
+    font-size: 14px;
+  }
+
+  .cart-summary {
+    width: 100%;
+  }
+
+  .summary-row {
+    font-size: 13px;
+  }
+
+  .order-card {
+    padding: 10px;
+    margin-bottom: 12px;
+  }
+
+  .order-header {
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+  }
+
+  .order-header h4 {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  .order-header p {
+    font-size: 11px;
+  }
+
+  .status-badge {
+    padding: 2px 6px;
+    font-size: 9px;
+    margin-bottom: 4px;
+  }
+
+  .order-item {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .order-footer {
+    padding-top: 8px;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .total-amount {
+    font-size: 16px;
+  }
+
+  .btn-cancel-order {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .contact-card {
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+
+  .contact-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+
+  .contact-card h3 {
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  .contact-card p {
+    font-size: 11px;
+    margin: 4px 0;
+  }
+
+  .profile-picture-display {
+    width: 100px;
+    height: 100px;
+  }
+
+  .profile-picture-placeholder {
+    font-size: 12px;
+  }
+
+  .upload-label {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .upload-hint {
+    font-size: 10px;
+  }
+
+  .profile-header-actions {
+    padding: 10px;
+    flex-direction: column;
+  }
+
+  .profile-action-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn-edit-profile,
+  .btn-save-profile,
+  .btn-cancel-profile {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .profile-section {
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  .profile-section h3 {
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+
+  .section-header-with-action {
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 10px;
+  }
+
+  .section-header-with-action h3 {
+    margin: 0;
+    border: none;
+  }
+
+  .btn-copy-address {
+    width: 100%;
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .issues-page {
+    padding: 10px;
+  }
+
+  .report-issue-form-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .report-issue-form {
+    padding: 12px;
+  }
+
+  .issue-info {
+    padding: 12px;
+  }
+
+  .issue-info h3 {
+    font-size: 14px;
+  }
+
+  .issue-info ul li {
+    font-size: 12px;
+    padding: 6px 0;
+  }
+}
+
+@media (max-width: 425px) {
+  .page-title {
+    font-size: 15px;
+  }
+
+  .modal-content {
+    margin: 35% auto;
+  }
+
+  .stat-value {
+    font-size: 18px;
+  }
+
+  .product-price {
+    font-size: 16px;
+  }
+
+  .total-amount {
+    font-size: 15px;
+  }
+
+  .order-header h4 {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 375px) {
+  .page-title {
+    font-size: 14px;
+  }
+
+  .stat-value {
+    font-size: 16px;
+  }
+
+  .product-name {
+    font-size: 12px;
+  }
+
+  .btn-add-to-cart,
+  .btn-contact,
+  .btn-inquiry {
+    font-size: 11px;
+    padding: 8px;
+  }
+
+  .modal-content {
+    margin: 40% auto;
+    width: 100%;
+    border-radius: 4px;
+  }
+
+  .modal-header h2 {
+    font-size: 13px;
+  }
+
+  .form-group input,
+  .form-group select {
+    font-size: 13px;
   }
 }
 

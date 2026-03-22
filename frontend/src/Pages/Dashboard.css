@@ -230,72 +230,97 @@
 }
 
 @media (max-width: 1024px) {
+  .dashboard-header {
+    padding: 24px;
+  }
+
+  .dashboard-content,
+  .tab-content {
+    padding: 20px;
+  }
+
+  .quality-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .analytics-quick-access {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .charts-row {
     grid-template-columns: 1fr;
   }
-  
-  .chart-half,
-  .chart-full {
-    grid-column: span 1;
+
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .analytics-card {
+    padding: 20px;
+  }
+
+  .card-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 900px) {
+  .dashboard-header h1 {
+    font-size: 24px;
+  }
+
+  .dashboard-content,
+  .tab-content {
+    padding: 18px;
+  }
+
+  .quality-summary {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .analytics-quick-access {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .analytics-card {
+    padding: 18px;
+    gap: 16px;
+  }
+
+  .analytics-card .card-icon {
+    width: 52px;
+    height: 52px;
+    font-size: 24px;
   }
 }
 
 @media (max-width: 768px) {
   .dashboard-header {
-    padding: 20px;
+    padding: 18px;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     align-items: flex-start;
   }
 
-  .dashboard-content, .tab-content {
-    padding: 20px;
+  .dashboard-header h1 {
+    font-size: 20px;
+    margin-bottom: 0;
   }
-  
-  .logout-button, .logout-btn {
+
+  .logout-button,
+  .logout-btn {
     width: 100%;
-  }
-  
-  .quality-summary {
-    grid-template-columns: 1fr;
-  }
-
-  .analytics-quick-access {
-    grid-template-columns: 1fr;
-  }
-
-  .features-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .future-scope {
-    flex-direction: column;
-    padding: 28px;
-    text-align: center;
-  }
-
-  .future-icon {
-    font-size: 48px;
-  }
-
-  .analytics-card {
-    flex-direction: column;
-    text-align: center;
-    padding: 24px;
-  }
-
-  .analytics-card .card-icon {
-    margin: 0 auto;
-  }
-
-  .analytics-section .section-header h2 {
-    font-size: 26px;
-  }
-}
-
-@media (max-width: 480px) {
-  .dashboard-header {
-    padding: 16px;
+    padding: 10px 16px;
+    font-size: 13px;
   }
 
   .dashboard-content,
@@ -303,12 +328,485 @@
     padding: 16px;
   }
 
-  .future-scope {
-    padding: 20px;
+  .quality-summary {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .quality-stat {
+    padding: 16px 12px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+
+  .data-table {
+    font-size: 0.9rem;
+  }
+
+  .data-table th {
+    padding: 10px 8px;
+    font-size: 11px;
+  }
+
+  .data-table td {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .analytics-quick-access {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .analytics-card {
-    padding: 20px;
+    flex-direction: column;
+    text-align: center;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .analytics-card .card-icon {
+    margin: 0 auto;
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+  }
+
+  .analytics-card .card-content h3 {
+    font-size: 15px;
+  }
+
+  .analytics-card .card-content p {
+    font-size: 12px;
+  }
+
+  .charts-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .chart-half,
+  .chart-full {
+    grid-column: span 1;
+    min-height: 320px;
+  }
+
+  .analytics-section .section-header h2 {
+    font-size: 24px;
+  }
+
+  .databases-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .feature-item {
+    padding: 16px;
+  }
+
+  .feature-item h4 {
+    font-size: 14px;
+  }
+
+  .feature-item li {
+    font-size: 12px;
+  }
+
+  .future-scope {
+    padding: 24px;
+    gap: 16px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .future-icon {
+    font-size: 48px;
+  }
+
+  .future-content h3 {
+    font-size: 20px;
+  }
+
+  .future-content p {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-header {
+    padding: 12px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 18px;
+  }
+
+  .logout-button,
+  .logout-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .dashboard-content,
+  .tab-content {
+    padding: 12px;
+  }
+
+  .quality-summary {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .quality-stat {
+    padding: 14px 10px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+  }
+
+  .stat-value {
+    font-size: 20px;
+  }
+
+  .data-table th {
+    padding: 8px 6px;
+    font-size: 10px;
+  }
+
+  .data-table td {
+    padding: 6px;
+    font-size: 11px;
+  }
+
+  .badge {
+    padding: 3px 8px;
+    font-size: 10px;
+  }
+
+  .analytics-quick-access {
+    gap: 12px;
+  }
+
+  .analytics-card {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .analytics-card .card-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+
+  .analytics-card .card-content h3 {
+    font-size: 13px;
+  }
+
+  .analytics-card .card-content p {
+    font-size: 11px;
+    margin-bottom: 8px;
+  }
+
+  .analytics-card .card-link {
+    font-size: 11px;
+  }
+
+  .charts-row {
+    gap: 12px;
+  }
+
+  .chart-half,
+  .chart-full {
+    min-height: 280px;
+  }
+
+  .analytics-section .section-header h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+
+  .analytics-section .section-header p {
+    font-size: 13px;
+  }
+
+  .features-grid {
+    gap: 12px;
+  }
+
+  .feature-item {
+    padding: 12px;
+  }
+
+  .feature-icon {
+    font-size: 28px;
+  }
+
+  .feature-item h4 {
+    font-size: 13px;
+  }
+
+  .feature-item li {
+    font-size: 11px;
+    line-height: 1.8;
+  }
+
+  .future-scope {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .future-icon {
+    font-size: 40px;
+  }
+
+  .future-content h3 {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .future-content p {
+    font-size: 12px;
+    line-height: 1.6;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-header {
+    padding: 10px;
+    min-height: 50px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 16px;
+    margin-bottom: 0;
+  }
+
+  .logout-button,
+  .logout-btn {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  .dashboard-content,
+  .tab-content {
+    padding: 10px;
+  }
+
+  .welcome-text {
+    font-size: 12px;
+  }
+
+  .quality-summary {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .quality-stat {
+    padding: 12px 8px;
+  }
+
+  .stat-label {
+    font-size: 9px;
+  }
+
+  .stat-value {
+    font-size: 18px;
+  }
+
+  .data-table th {
+    padding: 6px 4px;
+    font-size: 9px;
+  }
+
+  .data-table td {
+    padding: 5px 4px;
+    font-size: 10px;
+  }
+
+  .badge {
+    padding: 2px 6px;
+    font-size: 9px;
+  }
+
+  .analytics-quick-access {
+    gap: 10px;
+  }
+
+  .analytics-card {
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .analytics-card .card-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    margin: 0 auto;
+  }
+
+  .analytics-card .card-content h3 {
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  .analytics-card .card-content p {
+    font-size: 10px;
+    margin-bottom: 6px;
+  }
+
+  .analytics-card .card-link {
+    font-size: 10px;
+  }
+
+  .charts-row {
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .chart-half,
+  .chart-full {
+    min-height: 250px;
+  }
+
+  .card-title {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  .analytics-section {
+    padding: 0;
+  }
+
+  .analytics-section .section-header h2 {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .analytics-section .section-header p {
+    font-size: 12px;
+    margin-bottom: 16px;
+  }
+
+  .features-section h3 {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  .features-grid {
+    gap: 10px;
+  }
+
+  .feature-item {
+    padding: 10px;
+    border-left-width: 3px;
+    margin-bottom: 8px;
+  }
+
+  .feature-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .feature-item h4 {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .feature-item li {
+    font-size: 10px;
+    line-height: 1.6;
+    margin-bottom: 3px;
+  }
+
+  .future-scope {
+    padding: 12px;
+    gap: 10px;
+    border-radius: 12px;
+  }
+
+  .future-icon {
+    font-size: 36px;
+  }
+
+  .future-content h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  .future-content p {
+    font-size: 11px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+}
+
+@media (max-width: 425px) {
+  .dashboard-header h1 {
+    font-size: 15px;
+  }
+
+  .stat-value {
+    font-size: 16px;
+  }
+
+  .analytics-card .card-content h3 {
+    font-size: 11px;
+  }
+
+  .chart-half,
+  .chart-full {
+    min-height: 220px;
+  }
+
+  .features-section h3 {
+    font-size: 15px;
+  }
+
+  .feature-item h4 {
+    font-size: 11px;
+  }
+
+  .future-content h3 {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 375px) {
+  .dashboard-header h1 {
+    font-size: 14px;
+  }
+
+  .stat-label {
+    font-size: 8px;
+  }
+
+  .stat-value {
+    font-size: 15px;
+  }
+
+  .analytics-card .card-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .chart-half,
+  .chart-full {
+    min-height: 200px;
   }
 }
 

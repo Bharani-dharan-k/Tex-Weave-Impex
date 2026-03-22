@@ -552,13 +552,49 @@ function Home1() {
   </footer>
   {/* Code injected by live-server */}
   <style>{`
-        @media (max-width: 900px) {
-          header {
-            padding: 12px 0;
+        @media (max-width: 1024px) {
+          .container {
+            padding: 0 30px;
           }
 
+          .section {
+            padding: 70px 0;
+          }
+
+          .hero {
+            height: 600px;
+          }
+
+          .hero-content h1 {
+            font-size: 48px;
+            letter-spacing: 6px;
+          }
+
+          .hero-content p {
+            font-size: 28px;
+          }
+
+          .features-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          .product-card {
+            min-width: 240px;
+            max-width: 240px;
+          }
+        }
+
+        @media (max-width: 900px) {
           .container {
-            padding: 0 16px;
+            padding: 0 20px;
+          }
+
+          header {
+            padding: 15px 0;
           }
 
           .header-content {
@@ -579,11 +615,64 @@ function Home1() {
             font-size: 11px;
             letter-spacing: 0.4px;
           }
+
+          .hero {
+            height: 500px;
+          }
+
+          .hero-content h1 {
+            font-size: 38px;
+            letter-spacing: 4px;
+          }
+
+          .hero-content p {
+            font-size: 22px;
+          }
+
+          .section-title {
+            font-size: 36px;
+          }
+
+          .feature-item {
+            padding: 30px 20px;
+          }
+
+          .process-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .products-section {
+            padding: 0 30px;
+          }
+
+          .products-grid {
+            gap: 15px;
+          }
+
+          .stat-number {
+            font-size: 48px;
+          }
+
+          .footer-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          .carousel-arrow {
+            width: 50px;
+            height: 50px;
+            font-size: 22px;
+          }
         }
 
         @media (max-width: 768px) {
           .container {
-            padding: 0 12px;
+            padding: 0 16px;
+            max-width: 100%;
+          }
+
+          header {
+            padding: 12px 0;
+            height: auto;
           }
 
           .logo h3 {
@@ -597,6 +686,709 @@ function Home1() {
 
           nav ul {
             display: none;
+          }
+
+          .hero {
+            height: 400px;
+          }
+
+          .hero-content h1 {
+            font-size: 28px;
+            letter-spacing: 2px;
+            line-height: 1.3;
+          }
+
+          .hero-content p {
+            font-size: 16px;
+            margin-bottom: 10px;
+          }
+
+          .section {
+            padding: 50px 0;
+          }
+
+          .section-title {
+            font-size: 28px;
+            margin-bottom: 20px;
+          }
+
+          .section-divider {
+            margin-bottom: 30px;
+          }
+
+          .features-grid {
+            grid-template-columns: 1fr;
+            gap: 25px;
+            margin-top: 40px;
+          }
+
+          .feature-item {
+            padding: 25px 20px;
+            border-radius: 12px;
+          }
+
+          .feature-item h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+          }
+
+          .feature-item p {
+            font-size: 14px;
+          }
+
+          .feature-icon {
+            width: 90px;
+            height: 90px;
+            font-size: 40px;
+            margin-bottom: 15px;
+          }
+
+          .products-section {
+            padding: 0 15px;
+            margin-top: 40px;
+          }
+
+          .products-grid {
+            gap: 12px;
+          }
+
+          .product-card {
+            max-width: 100%;
+            min-width: 100%;
+            flex-basis: 100%;
+            height: 300px;
+          }
+
+          .product-overlay h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+          }
+
+          .product-category {
+            font-size: 12px;
+            margin-bottom: 10px;
+          }
+
+          .carousel-arrow {
+            width: 45px;
+            height: 45px;
+            font-size: 18px;
+          }
+
+          .carousel-arrow.prev {
+            left: 5px;
+          }
+
+          .carousel-arrow.next {
+            right: 5px;
+          }
+
+          .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 30px;
+          }
+
+          .stat-item {
+            padding: 30px 15px;
+          }
+
+          .stat-number {
+            font-size: 42px;
+            margin-bottom: 15px;
+          }
+
+          .stat-text {
+            font-size: 16px;
+          }
+
+          .process-grid {
+            grid-template-columns: 1fr;
+            gap: 25px;
+            margin-top: 40px;
+          }
+
+          .process-card {
+            padding: 25px;
+          }
+
+          .process-card h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+          }
+
+          .process-card p {
+            font-size: 14px;
+            line-height: 1.7;
+          }
+
+          .process-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 28px;
+            margin-bottom: 15px;
+          }
+
+          .certification-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 40px;
+          }
+
+          .certification-card {
+            padding: 20px;
+          }
+
+          .certification-card img {
+            max-height: 140px;
+            margin-bottom: 10px;
+          }
+
+          .certification-card h3 {
+            font-size: 14px;
+            margin-top: 10px;
+          }
+
+          .footer-grid {
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+          }
+
+          .footer-col h5 {
+            font-size: 14px;
+            margin-bottom: 20px;
+          }
+
+          .footer-col p, .footer-col a {
+            font-size: 13px;
+            line-height: 1.8;
+          }
+
+          .back-to-top {
+            width: 45px;
+            height: 45px;
+            bottom: 20px;
+            right: 20px;
+            font-size: 18px;
+          }
+
+          .modal-body {
+            padding: 30px 20px;
+          }
+
+          .certifications-display {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+          }
+
+          .cert-item {
+            padding: 20px;
+          }
+
+          .cert-item img {
+            max-height: 120px;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .container {
+            padding: 0 12px;
+          }
+
+          header {
+            padding: 10px 0;
+          }
+
+          .logo h3 {
+            font-size: 14px;
+            letter-spacing: 0.8px;
+          }
+
+          .hero {
+            height: 320px;
+          }
+
+          .hero-content h1 {
+            font-size: 22px;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+          }
+
+          .hero-content p {
+            font-size: 14px;
+          }
+
+          .section {
+            padding: 40px 0;
+          }
+
+          .section-title {
+            font-size: 22px;
+          }
+
+          .section-divider {
+            margin-bottom: 25px;
+          }
+
+          .journey-text {
+            font-size: 14px;
+            line-height: 1.8;
+          }
+
+          .features {
+            padding: 60px 0;
+          }
+
+          .features-grid {
+            gap: 20px;
+            margin-top: 30px;
+          }
+
+          .feature-item {
+            padding: 20px 15px;
+          }
+
+          .feature-item h3 {
+            font-size: 16px;
+          }
+
+          .feature-item p {
+            font-size: 13px;
+          }
+
+          .feature-icon {
+            width: 70px;
+            height: 70px;
+            font-size: 32px;
+            margin-bottom: 12px;
+          }
+
+          .products-section {
+            padding: 0 10px;
+            margin-top: 30px;
+          }
+
+          .carousel-arrow {
+            width: 40px;
+            height: 40px;
+            font-size: 16px;
+          }
+
+          .stats-grid {
+            gap: 25px;
+          }
+
+          .stat-item {
+            padding: 25px 12px;
+          }
+
+          .stat-number {
+            font-size: 36px;
+          }
+
+          .stat-text {
+            font-size: 14px;
+          }
+
+          .stat-divider {
+            margin-bottom: 15px;
+          }
+
+          .process-grid {
+            gap: 20px;
+            margin-top: 30px;
+          }
+
+          .process-card {
+            padding: 20px;
+          }
+
+          .process-card h3 {
+            font-size: 16px;
+          }
+
+          .process-card p {
+            font-size: 13px;
+          }
+
+          .process-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+          }
+
+          .certification-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+            max-width: 100%;
+          }
+
+          .certification-card {
+            padding: 15px;
+          }
+
+          .certification-card img {
+            max-height: 100px;
+          }
+
+          .certification-card h3 {
+            font-size: 13px;
+          }
+
+          .footer-grid {
+            gap: 25px;
+          }
+
+          .footer-col h5 {
+            font-size: 13px;
+          }
+
+          .footer-col p, .footer-col a {
+            font-size: 12px;
+          }
+
+          .footer-bottom {
+            font-size: 13px;
+            padding-top: 15px;
+          }
+
+          .back-to-top {
+            width: 40px;
+            height: 40px;
+            bottom: 15px;
+            right: 15px;
+          }
+
+          .modal-content {
+            width: 95%;
+            margin: 15% auto;
+          }
+
+          .modal-header {
+            padding: 20px;
+          }
+
+          .modal-header h2 {
+            font-size: 24px;
+          }
+
+          .modal-body {
+            padding: 20px 15px;
+          }
+
+          .certifications-display {
+            grid-template-columns: 1fr;
+            gap: 15px;
+          }
+
+          .cert-item {
+            padding: 15px;
+          }
+
+          .cert-item img {
+            max-height: 100px;
+          }
+
+          .cert-item h4 {
+            font-size: 12px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .container {
+            padding: 0 12px;
+          }
+
+          header {
+            padding: 8px 0;
+          }
+
+          .logo h3 {
+            font-size: 13px;
+            letter-spacing: 0.5px;
+          }
+
+          .mobile-menu-button {
+            font-size: 20px;
+          }
+
+          .hero {
+            height: 280px;
+          }
+
+          .hero-content h1 {
+            font-size: 18px;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+          }
+
+          .hero-content p {
+            font-size: 12px;
+            margin-bottom: 15px;
+          }
+
+          .section {
+            padding: 30px 0;
+          }
+
+          .section-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+          }
+
+          .journey-text {
+            font-size: 13px;
+            line-height: 1.7;
+            max-width: 100%;
+          }
+
+          .features {
+            padding: 50px 0;
+          }
+
+          .features-grid {
+            gap: 15px;
+            margin-top: 25px;
+          }
+
+          .feature-item {
+            padding: 15px 12px;
+          }
+
+          .feature-item h3 {
+            font-size: 15px;
+            margin-bottom: 10px;
+          }
+
+          .feature-item p {
+            font-size: 12px;
+            line-height: 1.6;
+          }
+
+          .feature-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 28px;
+            margin-bottom: 10px;
+          }
+
+          .carousel-arrow {
+            width: 36px;
+            height: 36px;
+            font-size: 14px;
+          }
+
+          .carousel-arrow.prev {
+            left: 3px;
+          }
+
+          .carousel-arrow.next {
+            right: 3px;
+          }
+
+          .products-section {
+            padding: 0 8px;
+            margin-top: 25px;
+          }
+
+          .product-overlay h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+          }
+
+          .product-category {
+            font-size: 11px;
+          }
+
+          .stats-grid {
+            gap: 20px;
+          }
+
+          .stat-item {
+            padding: 20px 10px;
+          }
+
+          .stat-number {
+            font-size: 28px;
+          }
+
+          .stat-text {
+            font-size: 12px;
+          }
+
+          .stat-divider {
+            margin: 10px auto;
+          }
+
+          .process-grid {
+            gap: 15px;
+            margin-top: 25px;
+          }
+
+          .process-card {
+            padding: 15px;
+            border-left-width: 3px;
+          }
+
+          .process-card h3 {
+            font-size: 15px;
+            margin-bottom: 10px;
+          }
+
+          .process-card p {
+            font-size: 12px;
+            line-height: 1.6;
+            text-align: left;
+          }
+
+          .process-icon {
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+            margin-bottom: 10px;
+          }
+
+          .certification-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+          }
+
+          .certification-card {
+            padding: 12px;
+          }
+
+          .certification-card img {
+            max-height: 90px;
+          }
+
+          .certification-card h3 {
+            font-size: 12px;
+            margin-top: 8px;
+          }
+
+          .footer-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+          }
+
+          .footer-col h5 {
+            font-size: 12px;
+            margin-bottom: 15px;
+          }
+
+          .footer-col p, .footer-col a {
+            font-size: 11px;
+            line-height: 1.7;
+            margin-bottom: 5px;
+          }
+
+          .social-icons {
+            margin-top: 15px;
+          }
+
+          .social-icons a {
+            width: 32px;
+            height: 32px;
+            line-height: 32px;
+            font-size: 15px;
+          }
+
+          .footer-bottom {
+            font-size: 11px;
+            padding-top: 12px;
+          }
+
+          .back-to-top {
+            width: 38px;
+            height: 38px;
+            bottom: 12px;
+            right: 12px;
+            font-size: 16px;
+          }
+
+          .modal-content {
+            width: 97%;
+            margin: 20% auto;
+            border-radius: 8px;
+          }
+
+          .modal-header {
+            padding: 15px;
+            border-radius: 8px 8px 0 0;
+          }
+
+          .modal-header h2 {
+            font-size: 20px;
+          }
+
+          .modal-header p {
+            font-size: 13px;
+          }
+
+          .close-modal {
+            right: 15px;
+            top: 15px;
+            font-size: 28px;
+            width: 35px;
+            height: 35px;
+          }
+
+          .modal-body {
+            padding: 15px 12px;
+          }
+
+          .certifications-display {
+            grid-template-columns: 1fr;
+            gap: 12px;
+          }
+
+          .cert-item {
+            padding: 12px;
+          }
+
+          .cert-item img {
+            max-height: 80px;
+          }
+
+          .cert-item h4 {
+            font-size: 11px;
+            margin-top: 6px;
+          }
+        }
+
+        @media (max-width: 375px) {
+          .container {
+            padding: 0 10px;
+          }
+
+          .logo h3 {
+            font-size: 12px;
+            letter-spacing: 0.3px;
+          }
+
+          .hero {
+            height: 250px;
+          }
+
+          .hero-content h1 {
+            font-size: 16px;
+          }
+
+          .hero-content p {
+            font-size: 11px;
+          }
+
+          .section-title {
+            font-size: 18px;
+          }
+
+          .feature-item h3 {
+            font-size: 14px;
+          }
+
+          .stat-number {
+            font-size: 24px;
           }
         }
       `}</style>
