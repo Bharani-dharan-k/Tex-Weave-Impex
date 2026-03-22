@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom';
-import img1 from "../assets/logo.png";
 import bedImg from '../assets/bed.jpg';
 import bathLinenImg from '../assets/bath linen (1).jpg'
 import kitchenLinenImg from '../assets/kitchen linen (1).jpg'
@@ -55,7 +54,6 @@ function Home1() {
     <div className="container">
       <div className="header-content">
         <div className="logo">
-          <img src={img1} alt="Tex Weave Impex logo" />
           <h3>TEX WEAVE IMPEX</h3>
         </div>
         <div className="mobile-menu-button">
@@ -553,8 +551,56 @@ function Home1() {
     </div>
   </footer>
   {/* Code injected by live-server */}
-</>
+  <style>{`
+        @media (max-width: 900px) {
+          header {
+            padding: 12px 0;
+          }
 
+          .container {
+            padding: 0 16px;
+          }
+
+          .header-content {
+            gap: 12px;
+          }
+
+          .logo h3 {
+            font-size: 18px;
+            letter-spacing: 1.5px;
+          }
+
+          nav ul {
+            gap: 0;
+          }
+
+          nav a {
+            padding: 10px 12px;
+            font-size: 11px;
+            letter-spacing: 0.4px;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .container {
+            padding: 0 12px;
+          }
+
+          .logo h3 {
+            font-size: 16px;
+            letter-spacing: 1px;
+          }
+
+          .mobile-menu-button {
+            display: block;
+          }
+
+          nav ul {
+            display: none;
+          }
+        }
+      `}</style>
+</>
 
   )
 }
