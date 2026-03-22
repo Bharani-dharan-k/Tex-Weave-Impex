@@ -29,13 +29,17 @@ router.get('/', async (req, res) => {
       ];
     }
     
-    const products = await Product.find(query)
+    const [products, totalCount] = await Promise.all([
+      Product.find(query)
       .limit(parseInt(limit))
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 }),
+      Product.countDocuments(query)
+    ]);
     
     res.json({
       success: true,
       count: products.length,
+      totalCount,
       products
     });
   } catch (error) {

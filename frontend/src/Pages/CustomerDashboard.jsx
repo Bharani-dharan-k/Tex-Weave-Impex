@@ -366,6 +366,38 @@ const CustomerDashboard = ({ user, onLogout }) => {
     }
   }
 
+  const formatShortOrderId = (orderLike = {}) => {
+    const rawDate = orderLike.createdAt || orderLike.orderDate
+    const d = rawDate ? new Date(rawDate) : null
+    if (!d || Number.isNaN(d.getTime())) {
+      return orderLike.orderId || orderLike._id?.slice(-8)?.toUpperCase() || 'ORD-NA'
+    }
+
+    const yyyy = d.getFullYear()
+    const mm = String(d.getMonth() + 1).padStart(2, '0')
+    const dd = String(d.getDate()).padStart(2, '0')
+    const datePart = `${yyyy}${mm}${dd}`
+
+    const customerName = (orderLike.customerInfo?.name || profile?.name || user?.name || '').toUpperCase()
+    const letters = customerName.replace(/[^A-Z]/g, '')
+    const fallback = (orderLike.orderId || orderLike._id || 'XXX').toUpperCase().replace(/[^A-Z0-9]/g, '')
+    const suffix = (letters.slice(0, 3) || fallback.slice(-3) || 'XXX').padEnd(3, 'X')
+
+    return `ORD-${datePart}-${suffix}`
+  }
+
+  const openReviewForProduct = ({ productId, orderId, productName }) => {
+    setReviewForm({
+      rating: 5,
+      reviewTitle: productName || '',
+      reviewText: '',
+      productId,
+      orderId
+    })
+    setCurrentPage('reviews')
+    setShowReviewModal(true)
+  }
+
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
       const script = document.createElement('script')
@@ -1244,7 +1276,7 @@ const CustomerDashboard = ({ user, onLogout }) => {
                 <div key={order._id} className="order-card">
                   <div className="order-header">
                     <div>
-                      <h4>Order #{order.orderId}</h4>
+                      <h4>Order #{formatShortOrderId(order)}</h4>
                       <p className="order-date">{new Date(order.createdAt).toLocaleDateString('en-IN', {
                         year: 'numeric',
                         month: 'long',
@@ -1270,8 +1302,11 @@ const CustomerDashboard = ({ user, onLogout }) => {
                           <button
                             className="btn-write-review"
                             onClick={() => {
-                              setReviewForm({ rating: 5, reviewTitle: '', reviewText: '', productId: item.product?._id || item.product, orderId: order._id })
-                              setShowReviewModal(true)
+                              openReviewForProduct({
+                                productId: item.product?._id || item.product,
+                                orderId: order._id,
+                                productName: item.productName
+                              })
                             }}
                           >
                             <Star size={13} style={{ marginRight: '4px' }} /> Review
@@ -2016,11 +2051,14 @@ const CustomerDashboard = ({ user, onLogout }) => {
                 <div key={idx} className="enh-eligible-item">
                   <div>
                     <h4>{item.productName}</h4>
-                    <p>Order #{item.orderId} · {new Date(item.orderDate).toLocaleDateString('en-IN')}</p>
+                    <p>Order #{formatShortOrderId(item)} · {new Date(item.orderDate).toLocaleDateString('en-IN')}</p>
                   </div>
                   <button className="enh-btn-review" onClick={() => {
-                    setReviewForm({ rating: 5, reviewTitle: '', reviewText: '', productId: item.productId, orderId: item.orderId })
-                    setShowReviewModal(true)
+                    openReviewForProduct({
+                      productId: item.productId,
+                      orderId: item.orderId,
+                      productName: item.productName
+                    })
                   }}>
                     <Star size={14} style={{ marginRight: '5px' }} /> Write Review
                   </button>

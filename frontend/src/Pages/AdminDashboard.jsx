@@ -178,17 +178,19 @@ const DashboardHome = ({ user, setCurrentPage }) => {
   const fetchStats = async () => {
     try {
       setLoading(true)
-      const [productsRes, usersRes] = await Promise.all([
-        axios.get('/api/products').catch(() => ({ data: { products: [] } })),
-        axios.get('/api/auth/users').catch(() => ({ data: [] }))
+      const [productsRes, usersRes, inventoryOverviewRes] = await Promise.all([
+        axios.get('/api/products', { params: { limit: 100000 } }).catch(() => ({ data: { products: [], totalCount: 0 } })),
+        axios.get('/api/auth/users').catch(() => ({ data: [] })),
+        axios.get('/api/analytics/inventory/overview').catch(() => ({ data: { lowStock: 0 } }))
       ])
       
       const products = productsRes.data?.products || []
+      const totalProducts = productsRes.data?.totalCount ?? products.length
       const users = usersRes.data || []
-      const lowStockCount = products.filter(p => p.stock < 10).length
+      const lowStockCount = Number(inventoryOverviewRes.data?.lowStock || 0)
 
       setStats({
-        totalProducts: products.length,
+        totalProducts,
         totalUsers: users.length,
         lowStock: lowStockCount
       })
@@ -604,6 +606,21 @@ const ProductManagement = () => {
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [editingProduct, setEditingProduct] = useState(null)
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    category: '',
+    costPrice: '',
+    sellingPrice: '',
+    reorderLevel: '',
+    description: '',
+    unit: 'meters',
+    isActive: true
+  })
+  const [editImageFile, setEditImageFile] = useState(null)
+  const [editImagePreview, setEditImagePreview] = useState('')
+  const [editLoading, setEditLoading] = useState(false)
+  const [editMessage, setEditMessage] = useState({ type: '', text: '' })
 
   useEffect(() => {
     fetchProducts()
@@ -635,6 +652,113 @@ const ProductManagement = () => {
     } catch (error) {
       console.error('Error deleting product:', error)
       alert('Failed to delete product')
+    }
+  }
+
+  const openEditModal = (product) => {
+    setEditingProduct(product)
+    setEditFormData({
+      name: product.name || '',
+      category: product.category || '',
+      costPrice: String(product.costPrice ?? ''),
+      sellingPrice: String(product.sellingPrice ?? ''),
+      reorderLevel: String(product.reorderLevel ?? ''),
+      description: product.description || '',
+      unit: product.unit || 'meters',
+      isActive: Boolean(product.isActive)
+    })
+    setEditImageFile(null)
+    setEditImagePreview(product.image?.url || '')
+    setEditMessage({ type: '', text: '' })
+  }
+
+  const closeEditModal = () => {
+    setEditingProduct(null)
+    setEditImageFile(null)
+    setEditImagePreview('')
+    setEditMessage({ type: '', text: '' })
+  }
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: name === 'isActive' ? value === 'true' : value
+    }))
+    setEditMessage({ type: '', text: '' })
+  }
+
+  const handleEditImageChange = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+    if (!validTypes.includes(file.type)) {
+      setEditMessage({ type: 'error', text: 'Please select a valid image file (JPEG, PNG, GIF, or WebP)' })
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setEditMessage({ type: 'error', text: 'Image size must be less than 5MB' })
+      return
+    }
+
+    setEditImageFile(file)
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setEditImagePreview(reader.result)
+    }
+    reader.readAsDataURL(file)
+    setEditMessage({ type: '', text: '' })
+  }
+
+  const removeEditImage = () => {
+    setEditImageFile(null)
+    setEditImagePreview(editingProduct?.image?.url || '')
+    const fileInput = document.getElementById('editProductImage')
+    if (fileInput) fileInput.value = ''
+  }
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault()
+    if (!editingProduct) return
+
+    try {
+      setEditLoading(true)
+      setEditMessage({ type: '', text: '' })
+
+      const formDataToSend = new FormData()
+      formDataToSend.append('name', editFormData.name)
+      formDataToSend.append('category', editFormData.category)
+      formDataToSend.append('costPrice', editFormData.costPrice)
+      formDataToSend.append('sellingPrice', editFormData.sellingPrice)
+      formDataToSend.append('reorderLevel', editFormData.reorderLevel)
+      formDataToSend.append('description', editFormData.description)
+      formDataToSend.append('unit', editFormData.unit)
+      formDataToSend.append('isActive', String(editFormData.isActive))
+
+      if (editImageFile) {
+        formDataToSend.append('image', editImageFile)
+      }
+
+      await axios.put(`/api/products/${editingProduct._id || editingProduct.id}`, formDataToSend, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+
+      setEditMessage({ type: 'success', text: 'Product updated successfully!' })
+      await fetchProducts()
+
+      setTimeout(() => {
+        closeEditModal()
+      }, 600)
+    } catch (error) {
+      console.error('Error updating product:', error.response || error)
+      const errorMessage = error.response?.data?.message || 'Failed to update product. Please try again.'
+      setEditMessage({ type: 'error', text: errorMessage })
+    } finally {
+      setEditLoading(false)
     }
   }
 
@@ -729,7 +853,10 @@ const ProductManagement = () => {
                     </span>
                   </td>
                   <td>
-                    <button className="btn-action delete" onClick={() => handleDelete(product._id || product.id)}>Delete</button>
+                    <div className="product-action-buttons">
+                      <button className="btn-action edit" onClick={() => openEditModal(product)}>Edit</button>
+                      <button className="btn-action delete" onClick={() => handleDelete(product._id || product.id)}>Delete</button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -737,6 +864,194 @@ const ProductManagement = () => {
           </table>
         )}
       </div>
+
+      {editingProduct && (
+        <div className="edit-modal-overlay" onClick={closeEditModal}>
+          <div className="edit-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="edit-modal-header">
+              <h3>Edit Product</h3>
+              <button type="button" className="edit-modal-close" onClick={closeEditModal}>
+                <X size={18} />
+              </button>
+            </div>
+
+            {editMessage.text && (
+              <div className={`message-alert ${editMessage.type}`}>
+                {editMessage.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
+                <span>{editMessage.text}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleEditSubmit} className="product-form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="editProductId">Product ID</label>
+                  <input
+                    type="text"
+                    id="editProductId"
+                    value={editingProduct.productId || ''}
+                    disabled
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="editName">Product Name *</label>
+                  <input
+                    type="text"
+                    id="editName"
+                    name="name"
+                    value={editFormData.name}
+                    onChange={handleEditChange}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="editCategory">Category *</label>
+                  <select
+                    id="editCategory"
+                    name="category"
+                    value={editFormData.category}
+                    onChange={handleEditChange}
+                    required
+                  >
+                    <option value="">Select category</option>
+                    <option value="Cotton">Cotton</option>
+                    <option value="Polyester">Polyester</option>
+                    <option value="Silk">Silk</option>
+                    <option value="Wool">Wool</option>
+                    <option value="Linen">Linen</option>
+                    <option value="Blended">Blended</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="editUnit">Unit *</label>
+                  <select
+                    id="editUnit"
+                    name="unit"
+                    value={editFormData.unit}
+                    onChange={handleEditChange}
+                    required
+                  >
+                    <option value="meters">Meters</option>
+                    <option value="kg">Kilograms</option>
+                    <option value="pieces">Pieces</option>
+                    <option value="rolls">Rolls</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="editCostPrice">Cost Price (₹) *</label>
+                  <input
+                    type="number"
+                    id="editCostPrice"
+                    name="costPrice"
+                    value={editFormData.costPrice}
+                    onChange={handleEditChange}
+                    min="0"
+                    step="0.01"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="editSellingPrice">Selling Price (₹) *</label>
+                  <input
+                    type="number"
+                    id="editSellingPrice"
+                    name="sellingPrice"
+                    value={editFormData.sellingPrice}
+                    onChange={handleEditChange}
+                    min="0"
+                    step="0.01"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="editReorderLevel">Reorder Level *</label>
+                  <input
+                    type="number"
+                    id="editReorderLevel"
+                    name="reorderLevel"
+                    value={editFormData.reorderLevel}
+                    onChange={handleEditChange}
+                    min="0"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="editStatus">Status</label>
+                  <select
+                    id="editStatus"
+                    name="isActive"
+                    value={String(editFormData.isActive)}
+                    onChange={handleEditChange}
+                  >
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="editDescription">Description</label>
+                <textarea
+                  id="editDescription"
+                  name="description"
+                  value={editFormData.description}
+                  onChange={handleEditChange}
+                  rows="3"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="editProductImage">Product Image</label>
+                <input
+                  type="file"
+                  id="editProductImage"
+                  name="image"
+                  accept="image/*"
+                  onChange={handleEditImageChange}
+                />
+                <small>Max size: 5MB. Formats: JPEG, PNG, GIF, WebP</small>
+
+                {editImagePreview && (
+                  <div className="image-preview-container">
+                    <img
+                      src={editImagePreview}
+                      alt="Product preview"
+                    />
+                    <button
+                      type="button"
+                      onClick={removeEditImage}
+                      className="remove-image-btn"
+                      title="Remove selected image"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="form-actions">
+                <button type="submit" className="btn-primary" disabled={editLoading}>
+                  {editLoading ? 'Saving...' : 'Save Changes'}
+                </button>
+                <button type="button" className="btn-secondary" onClick={closeEditModal} disabled={editLoading}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -930,6 +1245,31 @@ const UserDetail = ({ userId, onBack }) => {
   const orderStatusColor = { pending: '#d69e2e', confirmed: '#3182ce', processing: '#805ad5', shipped: '#2b6cb0', delivered: '#38a169', cancelled: '#e53e3e' }
   const issueStatusColor = { open: '#3182ce', 'in-progress': '#d69e2e', resolved: '#38a169', closed: '#718096' }
 
+  const formatShortOrderId = (order) => {
+    const rawDate = order?.createdAt ? new Date(order.createdAt) : null
+    if (!rawDate || Number.isNaN(rawDate.getTime())) {
+      return order?.orderId || order?._id?.slice(-8)?.toUpperCase() || 'ORD-NA'
+    }
+
+    const yyyy = rawDate.getFullYear()
+    const mm = String(rawDate.getMonth() + 1).padStart(2, '0')
+    const dd = String(rawDate.getDate()).padStart(2, '0')
+    const datePart = `${yyyy}${mm}${dd}`
+
+    const customerName = (user?.name || '').toUpperCase()
+    const letters = customerName.replace(/[^A-Z]/g, '')
+    const fallback = (order?.orderId || order?._id || 'XXX').toUpperCase().replace(/[^A-Z0-9]/g, '')
+    const suffix = (letters.slice(0, 3) || fallback.slice(-3) || 'XXX').padEnd(3, 'X')
+
+    return `ORD-${datePart}-${suffix}`
+  }
+
+  const getItemNames = (order) => {
+    return (order?.items || [])
+      .map(item => item?.productName || item?.product?.name || item?.product?.productName || item?.name || '')
+      .filter(Boolean)
+  }
+
   return (
     <div style={{ padding: '1.5rem' }}>
       {/* Back button */}
@@ -992,8 +1332,29 @@ const UserDetail = ({ userId, onBack }) => {
                   <tr key={order._id} style={{ borderBottom: '1px solid #e2e8f0' }}
                     onMouseEnter={e => e.currentTarget.style.background = '#f7fafc'}
                     onMouseLeave={e => e.currentTarget.style.background = 'white'}>
-                    <td style={{ padding: '0.9rem 1rem', fontFamily: 'monospace', color: '#667eea', fontWeight: '600' }}>{order.orderId || '#' + order._id.slice(-6)}</td>
-                    <td style={{ padding: '0.9rem 1rem', color: '#4a5568' }}>{order.items?.length || 0} item(s)</td>
+                    <td style={{ padding: '0.9rem 1rem', fontFamily: 'monospace', color: '#667eea', fontWeight: '600' }}>{formatShortOrderId(order)}</td>
+                    <td style={{ padding: '0.9rem 1rem', color: '#4a5568' }}>
+                      {(() => {
+                        const itemNames = getItemNames(order)
+                        if (itemNames.length === 0) {
+                          return <span style={{ color: '#a0aec0' }}>No items</span>
+                        }
+
+                        const preview = itemNames.slice(0, 2).join(', ')
+                        const hasMore = itemNames.length > 2
+                        const moreCount = itemNames.length - 2
+
+                        return (
+                          <span
+                            title={itemNames.join(', ')}
+                            style={{ display: 'inline-block', maxWidth: '260px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                          >
+                            <span style={{ fontWeight: '600', color: '#2d3748' }}>{preview}</span>
+                            {hasMore && <span style={{ color: '#718096', fontSize: '0.8rem' }}> +{moreCount} more</span>}
+                          </span>
+                        )
+                      })()}
+                    </td>
                     <td style={{ padding: '0.9rem 1rem', fontWeight: '600', color: '#2d3748' }}>₹{(order.totalAmount || 0).toLocaleString('en-IN')}</td>
                     <td style={{ padding: '0.9rem 1rem' }}>{statusBadge(order.paymentStatus, order.paymentStatus === 'completed' ? '#38a169' : order.paymentStatus === 'failed' ? '#e53e3e' : '#d69e2e')}</td>
                     <td style={{ padding: '0.9rem 1rem' }}>{statusBadge(order.orderStatus, orderStatusColor[order.orderStatus] || '#718096')}</td>
@@ -2606,6 +2967,33 @@ const AdminOrders = () => {
   const formatDate = (d) =>
     new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
 
+  const formatShortOrderId = (order) => {
+    const rawDate = order?.createdAt ? new Date(order.createdAt) : null
+    if (!rawDate || Number.isNaN(rawDate.getTime())) {
+      return order?.orderId || order?._id?.slice(-8)?.toUpperCase() || 'ORD-NA'
+    }
+
+    const yyyy = rawDate.getFullYear()
+    const mm = String(rawDate.getMonth() + 1).padStart(2, '0')
+    const dd = String(rawDate.getDate()).padStart(2, '0')
+    const datePart = `${yyyy}${mm}${dd}`
+
+    const customerName = (order?.customerInfo?.name || order?.user?.name || '').toUpperCase()
+    const letters = customerName.replace(/[^A-Z]/g, '')
+    const fallback = (order?.orderId || order?._id || 'XXX').toUpperCase().replace(/[^A-Z0-9]/g, '')
+    const suffix = (letters.slice(0, 3) || fallback.slice(-3) || 'XXX').padEnd(3, 'X')
+
+    return `ORD-${datePart}-${suffix}`
+  }
+
+  const getItemNames = (order) => {
+    const names = (order?.items || [])
+      .map(item => item?.productName || item?.product?.name || item?.product?.productName || item?.name || '')
+      .filter(Boolean)
+
+    return names
+  }
+
   const statusColors = {
     pending:    { bg: '#fff3cd', color: '#856404' },
     confirmed:  { bg: '#cfe2ff', color: '#084298' },
@@ -2776,7 +3164,7 @@ const AdminOrders = () => {
                     style={{ transition: 'background 0.15s', cursor: 'default' }}>
                     <td style={tdStyle}>
                       <span style={{ fontFamily: 'monospace', fontWeight: '600', fontSize: '0.8rem', color: '#4a5568' }}>
-                        {order.orderId || order._id.slice(-8).toUpperCase()}
+                        {formatShortOrderId(order)}
                       </span>
                     </td>
                     <td style={tdStyle}>
@@ -2789,8 +3177,26 @@ const AdminOrders = () => {
                     </td>
                     <td style={tdStyle}>{formatDate(order.createdAt)}</td>
                     <td style={tdStyle}>
-                      <span style={{ fontWeight: '600' }}>{order.items?.length || 0}</span>
-                      <span style={{ color: '#718096', fontSize: '0.8rem' }}> item{order.items?.length !== 1 ? 's' : ''}</span>
+                      {(() => {
+                        const itemNames = getItemNames(order)
+                        if (itemNames.length === 0) {
+                          return <span style={{ color: '#718096', fontSize: '0.82rem' }}>No items</span>
+                        }
+
+                        const preview = itemNames.slice(0, 2).join(', ')
+                        const hasMore = itemNames.length > 2
+                        const moreCount = itemNames.length - 2
+
+                        return (
+                          <span
+                            title={itemNames.join(', ')}
+                            style={{ display: 'inline-block', maxWidth: '230px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                          >
+                            <span style={{ fontWeight: '600', color: '#2d3748' }}>{preview}</span>
+                            {hasMore && <span style={{ color: '#718096', fontSize: '0.8rem' }}> +{moreCount} more</span>}
+                          </span>
+                        )
+                      })()}
                     </td>
                     <td style={{ ...tdStyle, fontWeight: '700', color: '#2d3748' }}>
                       ₹{(order.totalAmount || 0).toLocaleString()}
@@ -2863,7 +3269,7 @@ const AdminOrders = () => {
               <div>
                 <h3 style={{ fontWeight: '700', fontSize: '1.1rem', marginBottom: '2px' }}>Update Order Status</h3>
                 <p style={{ fontSize: '0.82rem', opacity: 0.85 }}>
-                  {selectedOrder.orderId || selectedOrder._id.slice(-8).toUpperCase()}
+                  {formatShortOrderId(selectedOrder)}
                 </p>
               </div>
               <button onClick={() => setSelectedOrder(null)}

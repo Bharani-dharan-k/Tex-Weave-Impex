@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://tex-weave-impex.onrender.com';
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.DEV ? 'http://localhost:5000' : 'https://tex-weave-impex.onrender.com');
 
 // Create axios instance with base URL
 const axiosInstance = axios.create({
@@ -30,7 +32,14 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status;
+    const requestUrl = error.config?.url || '';
+
+    // 401 can be expected on public auth endpoints (e.g., wrong password on login).
+    // Do not treat those as global session-expiration events.
+    const isPublicAuthEndpoint = /\/api\/auth\/(login|register|forgot-password|reset-password)$/.test(requestUrl);
+
+    if (status === 401 && !isPublicAuthEndpoint) {
       // Token expired or invalid
       localStorage.removeItem('token');
       localStorage.removeItem('user');

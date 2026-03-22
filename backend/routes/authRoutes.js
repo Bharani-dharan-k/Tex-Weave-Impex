@@ -38,9 +38,10 @@ router.post(
       }
 
       const { name, email, password, role } = req.body
+      const normalizedEmail = String(email || '').trim().toLowerCase()
 
       // Check if user exists
-      const userExists = await User.findOne({ email })
+      const userExists = await User.findOne({ email: normalizedEmail })
       if (userExists) {
         return res.status(400).json({ message: 'User already exists' })
       }
@@ -48,7 +49,7 @@ router.post(
       // Create user
       const user = await User.create({
         name,
-        email,
+        email: normalizedEmail,
         password,
         role: role || 'user'
       })
@@ -86,9 +87,10 @@ router.post(
       }
 
       const { email, password } = req.body
+      const normalizedEmail = String(email || '').trim().toLowerCase()
 
       // Check for user
-      const user = await User.findOne({ email }).select('+password')
+      const user = await User.findOne({ email: normalizedEmail }).select('+password')
 
       if (!user) {
         return res.status(401).json({ message: 'Invalid credentials' })
