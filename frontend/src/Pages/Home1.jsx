@@ -29,7 +29,7 @@ function Home1() {
   <meta charSet="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tex Weave Impex | Best Indian Home Textile Exporter in Karur</title>
-  <link rel="icon" type="image/png" href="logo.png" />
+  <link rel="icon" type="image/png" href="/logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
   <link
@@ -55,7 +55,7 @@ function Home1() {
     <div className="container">
       <div className="header-content">
         <div className="logo">
-          {/* <img src="name.jpeg" alt="TEX WEAVE IMPEX"> */}
+          <img src={img1} alt="Tex Weave Impex logo" />
           <h3>TEX WEAVE IMPEX</h3>
         </div>
         <div className="mobile-menu-button">

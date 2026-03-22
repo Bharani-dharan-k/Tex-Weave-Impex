@@ -804,6 +804,18 @@ const CustomerDashboard = ({ user, onLogout }) => {
     }
   }
 
+  const handleBulkOrderContact = (product) => {
+    setContactForm({
+      name: profile?.name || user?.name || '',
+      email: profile?.email || user?.email || '',
+      phone: profile?.phone || '',
+      inquiryType: 'bulk',
+      message: `Hi team, I would like a bulk quotation for ${product?.name || 'this product'} (${product?.productId || 'N/A'}). Please share MOQ, lead time, pricing tiers, and shipping details.`
+    })
+    setSelectedProduct(null)
+    setCurrentPage('contact')
+  }
+
   const handleProductClick = async (product) => {
     setSelectedProduct(product)
     setProductReviews([])
@@ -1045,7 +1057,9 @@ const CustomerDashboard = ({ user, onLogout }) => {
                 >
                   Add to Cart
                 </button>
-                <button className="btn-contact">Contact for Bulk Order</button>
+                <button className="btn-contact" onClick={() => handleBulkOrderContact(selectedProduct)}>
+                  Contact for Bulk Order
+                </button>
               </div>
 
               {/* Reviews Section */}

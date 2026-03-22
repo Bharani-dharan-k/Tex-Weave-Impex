@@ -2209,6 +2209,41 @@
     gap: 1rem;
     align-items: stretch;
   }
+
+  .modal-footer-section {
+    flex-direction: column;
+  }
+
+  .btn-add-to-cart,
+  .btn-contact,
+  .btn-inquiry {
+    width: 100%;
+  }
+
+  .order-status-badges {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .order-item span:first-child {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .order-card {
+    padding: 1rem;
+  }
+
+  .order-header h4 {
+    font-size: 1rem;
+    word-break: break-word;
+  }
+
+  .total-amount {
+    font-size: 1.1rem;
+  }
 }
 
 /* Profile Picture Section */
