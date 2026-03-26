@@ -2083,6 +2083,67 @@
   margin-bottom: 1.4rem;
 }
 
+.inventory-low-stock-row {
+  margin-bottom: 0;
+}
+
+.inventory-warning-banner {
+  margin-bottom: 0;
+}
+
+.inventory-fast-slow-row {
+  margin-top: 0;
+}
+
+/* ==================== CUSTOM MODAL ==================== */
+.custom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.custom-modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.custom-modal-content .modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.custom-modal-content .modal-header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  color: #111827;
+}
+
+.custom-modal-content .close-button {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.custom-modal-content .close-button:hover {
+  color: #111827;
+}
+
 .chart-half {
   min-width: 0;
   overflow: hidden;

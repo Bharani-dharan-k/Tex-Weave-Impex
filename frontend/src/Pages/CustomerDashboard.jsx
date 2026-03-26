@@ -367,10 +367,15 @@ const CustomerDashboard = ({ user, onLogout }) => {
   }
 
   const formatShortOrderId = (orderLike = {}) => {
+    // Use the actual orderId from database if available (new format)
+    if (orderLike?.orderId) {
+      return orderLike.orderId
+    }
+    // Fallback for backward compatibility
     const rawDate = orderLike.createdAt || orderLike.orderDate
     const d = rawDate ? new Date(rawDate) : null
     if (!d || Number.isNaN(d.getTime())) {
-      return orderLike.orderId || orderLike._id?.slice(-8)?.toUpperCase() || 'ORD-NA'
+      return orderLike?._id?.slice(-8)?.toUpperCase() || 'ORD-NA'
     }
 
     const yyyy = d.getFullYear()
@@ -380,10 +385,10 @@ const CustomerDashboard = ({ user, onLogout }) => {
 
     const customerName = (orderLike.customerInfo?.name || profile?.name || user?.name || '').toUpperCase()
     const letters = customerName.replace(/[^A-Z]/g, '')
-    const fallback = (orderLike.orderId || orderLike._id || 'XXX').toUpperCase().replace(/[^A-Z0-9]/g, '')
-    const suffix = (letters.slice(0, 3) || fallback.slice(-3) || 'XXX').padEnd(3, 'X')
+    const fallback = orderLike?._id?.toUpperCase().replace(/[^A-Z0-9]/g, '')
+    const suffix = (letters.slice(0, 3) || fallback?.slice(-3) || 'XXX').padEnd(3, 'X')
 
-    return `ORD-${datePart}-${suffix}`
+    return `#ORD-${datePart}-${suffix}`
   }
 
   const openReviewForProduct = ({ productId, orderId, productName }) => {
@@ -605,12 +610,21 @@ const CustomerDashboard = ({ user, onLogout }) => {
   const handleReorder = async (orderId) => {
     try {
       const data = await orderService.reorderOrder(orderId)
-      if (data.items) {
-        data.items.forEach(item => {
+      if (data.success && data.availableItems && data.availableItems.length > 0) {
+        data.availableItems.forEach(item => {
           if (item.product) addToCart(item.product, item.quantity)
         })
+        
+        // Show message about unavailable items if any
+        if (data.unavailableItems && data.unavailableItems.length > 0) {
+          const unavailableList = data.unavailableItems.map(item => `${item.productName} (${item.reason})`).join('\n')
+          alert(`Some items couldn't be added:\n\n${unavailableList}`)
+        }
+        
         setCurrentPage('orders')
-        alert('Items added to cart! Please review and checkout.')
+        alert('Available items added to cart! Please review and checkout.')
+      } else if (data.availableItems && data.availableItems.length === 0) {
+        alert('No items available for reordering. All products are out of stock or inactive.')
       }
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to reorder')
@@ -1335,13 +1349,15 @@ const CustomerDashboard = ({ user, onLogout }) => {
                       <span className="total-amount">₹{order.totalAmount.toLocaleString()}</span>
                     </div>
                     <div className="order-actions">
-                      <button
-                        className="btn-reorder"
-                        onClick={() => handleReorder(order._id)}
-                        title="Order Again"
-                      >
-                        <RefreshCw size={14} style={{marginRight:'4px'}} /> Order Again
-                      </button>
+                      {order.orderStatus === 'cancelled' && (
+                        <button
+                          className="btn-reorder"
+                          onClick={() => handleReorder(order._id)}
+                          title="Order Again"
+                        >
+                          <RefreshCw size={14} style={{marginRight:'4px'}} /> Order Again
+                        </button>
+                      )}
                       <button
                         className="btn-invoice"
                         onClick={() => handleDownloadInvoice(order._id)}

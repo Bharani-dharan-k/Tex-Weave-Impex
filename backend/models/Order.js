@@ -97,11 +97,34 @@ const orderSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Generate unique order ID
+// Generate unique order ID in format: #ORD-YYYYMMDD001-<customer_name>
 orderSchema.pre('save', async function() {
   if (!this.orderId) {
-    const count = await this.constructor.countDocuments();
-    this.orderId = `ORD-${Date.now()}-${String(count + 1).padStart(5, '0')}`;
+    // Get customer name
+    const User = mongoose.model('User');
+    const user = await User.findById(this.user).select('name');
+    const customerName = user?.name || 'CUSTOMER';
+    
+    // Format date as YYYYMMDD
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const datePart = `${yyyy}${mm}${dd}`;
+    
+    // Get count of orders created on same day for same customer
+    const startOfDay = new Date(now);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(now);
+    endOfDay.setHours(23, 59, 59, 999);
+    
+    const dailyCount = await this.constructor.countDocuments({
+      user: this.user,
+      createdAt: { $gte: startOfDay, $lte: endOfDay }
+    });
+    
+    const sequenceNum = String(dailyCount + 1).padStart(3, '0');
+    this.orderId = `#ORD-${datePart}${sequenceNum}-${customerName.toUpperCase()}`;
   }
 });
 

@@ -52,7 +52,7 @@ const parseDateRange = (query = {}) => {
 };
 
 const parseGranularity = (query = {}) => {
-  const allowed = new Set(['day', 'week', 'month']);
+  const allowed = new Set(['day', 'week', 'month', 'year']);
   const granularity = String(query.granularity || 'month').toLowerCase();
   return allowed.has(granularity) ? granularity : 'month';
 };
@@ -308,6 +308,10 @@ async function getKPIs(salesMatch) {
 }
 
 const getLabelProjection = (granularity) => {
+  if (granularity === 'year') {
+    return { $toString: '$_id.year' };
+  }
+
   if (granularity === 'day') {
     return {
       $concat: [
@@ -341,6 +345,10 @@ const getLabelProjection = (granularity) => {
 };
 
 const getSalesTrendGroupId = (granularity) => {
+  if (granularity === 'year') {
+    return { year: { $year: '$saleDate' } };
+  }
+
   if (granularity === 'day') {
     return {
       year: { $year: '$saleDate' },
@@ -363,6 +371,10 @@ const getSalesTrendGroupId = (granularity) => {
 };
 
 const getSalesTrendSort = (granularity) => {
+  if (granularity === 'year') {
+    return { '_id.year': 1 };
+  }
+
   if (granularity === 'day') {
     return { '_id.year': 1, '_id.month': 1, '_id.day': 1 };
   }

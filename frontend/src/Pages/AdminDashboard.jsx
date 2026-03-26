@@ -24,8 +24,13 @@ import {
   Clock,
   ChevronLeft,
   ChevronRight,
-  Edit2
+  Edit2,
+  Download
 } from 'lucide-react'
+import { jsPDF } from 'jspdf'
+import autoTable from 'jspdf-autotable'
+import html2canvas from 'html2canvas'
+import { ResponsiveContainer, LineChart as RechartsLineChart, Line, BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend as RechartsLegend } from 'recharts'
 import './AdminDashboard.css'
 import './Dashboard.css'
 import '../analytics/components/KPICard.css'
@@ -1195,6 +1200,7 @@ const UserDetail = ({ userId, onBack }) => {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('orders')
+  const [reportView, setReportView] = useState('weekly')
 
   useEffect(() => {
     if (!userId) return
@@ -1246,9 +1252,14 @@ const UserDetail = ({ userId, onBack }) => {
   const issueStatusColor = { open: '#3182ce', 'in-progress': '#d69e2e', resolved: '#38a169', closed: '#718096' }
 
   const formatShortOrderId = (order) => {
+    // Use the actual orderId from database if available (new format)
+    if (order?.orderId) {
+      return order.orderId
+    }
+    // Fallback for backward compatibility
     const rawDate = order?.createdAt ? new Date(order.createdAt) : null
     if (!rawDate || Number.isNaN(rawDate.getTime())) {
-      return order?.orderId || order?._id?.slice(-8)?.toUpperCase() || 'ORD-NA'
+      return order?._id?.slice(-8)?.toUpperCase() || 'ORD-NA'
     }
 
     const yyyy = rawDate.getFullYear()
@@ -1258,10 +1269,10 @@ const UserDetail = ({ userId, onBack }) => {
 
     const customerName = (user?.name || '').toUpperCase()
     const letters = customerName.replace(/[^A-Z]/g, '')
-    const fallback = (order?.orderId || order?._id || 'XXX').toUpperCase().replace(/[^A-Z0-9]/g, '')
-    const suffix = (letters.slice(0, 3) || fallback.slice(-3) || 'XXX').padEnd(3, 'X')
+    const fallback = order?._id?.toUpperCase().replace(/[^A-Z0-9]/g, '')
+    const suffix = (letters.slice(0, 3) || fallback?.slice(-3) || 'XXX').padEnd(3, 'X')
 
-    return `ORD-${datePart}-${suffix}`
+    return `#ORD-${datePart}-${suffix}`
   }
 
   const getItemNames = (order) => {
@@ -1269,6 +1280,93 @@ const UserDetail = ({ userId, onBack }) => {
       .map(item => item?.productName || item?.product?.name || item?.product?.productName || item?.name || '')
       .filter(Boolean)
   }
+
+  const getISOWeekInfo = (dateInput) => {
+    const date = new Date(dateInput)
+    if (Number.isNaN(date.getTime())) return null
+
+    const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+    const dayNumber = utcDate.getUTCDay() || 7
+    utcDate.setUTCDate(utcDate.getUTCDate() + 4 - dayNumber)
+
+    const year = utcDate.getUTCFullYear()
+    const yearStart = new Date(Date.UTC(year, 0, 1))
+    const week = Math.ceil((((utcDate - yearStart) / 86400000) + 1) / 7)
+
+    return { year, week }
+  }
+
+  const formatCurrency = (value) => `₹${(Number(value) || 0).toLocaleString('en-IN')}`
+
+  const buildOrderReports = (period) => {
+    const grouped = (orders || []).reduce((acc, order) => {
+      const date = new Date(order?.createdAt)
+      if (Number.isNaN(date.getTime())) return acc
+
+      const amount = Number(order?.totalAmount) || 0
+      let key = ''
+      let label = ''
+      let sortStamp = date.getTime()
+
+      if (period === 'weekly') {
+        const info = getISOWeekInfo(date)
+        if (!info) return acc
+        key = `${info.year}-W${String(info.week).padStart(2, '0')}`
+        label = `Week ${info.week}, ${info.year}`
+        sortStamp = new Date(info.year, 0, 1 + (info.week - 1) * 7).getTime()
+      }
+
+      if (period === 'monthly') {
+        const year = date.getFullYear()
+        const month = date.getMonth()
+        key = `${year}-${String(month + 1).padStart(2, '0')}`
+        label = new Date(year, month, 1).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })
+        sortStamp = new Date(year, month, 1).getTime()
+      }
+
+      if (period === 'yearly') {
+        const year = date.getFullYear()
+        key = `${year}`
+        label = `${year}`
+        sortStamp = new Date(year, 0, 1).getTime()
+      }
+
+      if (!key) return acc
+
+      if (!acc[key]) {
+        acc[key] = {
+          key,
+          label,
+          orderCount: 0,
+          totalRevenue: 0,
+          sortStamp,
+          lastOrderDate: date
+        }
+      }
+
+      acc[key].orderCount += 1
+      acc[key].totalRevenue += amount
+      if (date > acc[key].lastOrderDate) acc[key].lastOrderDate = date
+
+      return acc
+    }, {})
+
+    return Object.values(grouped)
+      .map(item => ({
+        ...item,
+        avgOrderValue: item.orderCount ? item.totalRevenue / item.orderCount : 0
+      }))
+      .sort((a, b) => b.sortStamp - a.sortStamp)
+  }
+
+  const weeklyReports = buildOrderReports('weekly')
+  const monthlyReports = buildOrderReports('monthly')
+  const yearlyReports = buildOrderReports('yearly')
+  const reportData = reportView === 'monthly'
+    ? monthlyReports
+    : reportView === 'yearly'
+      ? yearlyReports
+      : weeklyReports
 
   return (
     <div style={{ padding: '1.5rem' }}>
@@ -1305,7 +1403,7 @@ const UserDetail = ({ userId, onBack }) => {
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-        {[['orders', `Orders (${orders.length})`], ['reviews', `Reviews (${reviews.length})`], ['reports', `Reports & Issues (${issues.length})`]].map(([key, label]) => (
+        {[['orders', `Orders (${orders.length})`], ['reviews', `Reviews (${reviews.length})`], ['reports', `Reports & Issues (${issues.length})`], ['analytics', 'User Analytics']].map(([key, label]) => (
           <button key={key} style={tabStyle(key)} onClick={() => setActiveTab(key)}>{label}</button>
         ))}
       </div>
@@ -1340,17 +1438,12 @@ const UserDetail = ({ userId, onBack }) => {
                           return <span style={{ color: '#a0aec0' }}>No items</span>
                         }
 
-                        const preview = itemNames.slice(0, 2).join(', ')
-                        const hasMore = itemNames.length > 2
-                        const moreCount = itemNames.length - 2
-
                         return (
                           <span
                             title={itemNames.join(', ')}
-                            style={{ display: 'inline-block', maxWidth: '260px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                            style={{ display: 'inline-block', maxWidth: '400px' }}
                           >
-                            <span style={{ fontWeight: '600', color: '#2d3748' }}>{preview}</span>
-                            {hasMore && <span style={{ color: '#718096', fontSize: '0.8rem' }}> +{moreCount} more</span>}
+                            <span style={{ fontWeight: '600', color: '#2d3748' }}>{itemNames.join(', ')}</span>
                           </span>
                         )
                       })()}
@@ -1441,6 +1534,89 @@ const UserDetail = ({ userId, onBack }) => {
                 ))}
               </tbody>
             </table>
+          )}
+        </div>
+      )}
+
+      {/* User Analytics Tab */}
+      {activeTab === 'analytics' && (
+        <div style={{ background: 'white', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.25rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#2d3748' }}>Purchase Reports</h3>
+            <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+              {[
+                ['weekly', 'Weekly Report'],
+                ['monthly', 'Monthly Report'],
+                ['yearly', 'Yearly Report']
+              ].map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setReportView(key)}
+                  style={{
+                    border: '1px solid #e2e8f0',
+                    background: reportView === key ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : '#f8fafc',
+                    color: reportView === key ? '#ffffff' : '#4a5568',
+                    borderRadius: '8px',
+                    padding: '0.45rem 0.9rem',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {reportData.length === 0 ? (
+            <div style={{ padding: '2.5rem 1rem', textAlign: 'center', color: '#a0aec0' }}>
+              <BarChart3 size={42} style={{ opacity: 0.5 }} />
+              <p style={{ marginTop: '0.85rem' }}>No orders found to generate this report.</p>
+            </div>
+          ) : (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: '0.85rem', marginBottom: '1rem' }}>
+                <div style={{ background: '#f8fafc', borderRadius: '8px', padding: '0.8rem' }}>
+                  <p style={{ margin: 0, fontSize: '0.72rem', color: '#718096', textTransform: 'uppercase', fontWeight: 600 }}>Periods</p>
+                  <p style={{ margin: '0.35rem 0 0', fontSize: '1.2rem', fontWeight: 700, color: '#2d3748' }}>{reportData.length}</p>
+                </div>
+                <div style={{ background: '#f8fafc', borderRadius: '8px', padding: '0.8rem' }}>
+                  <p style={{ margin: 0, fontSize: '0.72rem', color: '#718096', textTransform: 'uppercase', fontWeight: 600 }}>Orders</p>
+                  <p style={{ margin: '0.35rem 0 0', fontSize: '1.2rem', fontWeight: 700, color: '#2d3748' }}>{reportData.reduce((sum, row) => sum + row.orderCount, 0)}</p>
+                </div>
+                <div style={{ background: '#f8fafc', borderRadius: '8px', padding: '0.8rem' }}>
+                  <p style={{ margin: 0, fontSize: '0.72rem', color: '#718096', textTransform: 'uppercase', fontWeight: 600 }}>Revenue</p>
+                  <p style={{ margin: '0.35rem 0 0', fontSize: '1.2rem', fontWeight: 700, color: '#2d3748' }}>{formatCurrency(reportData.reduce((sum, row) => sum + row.totalRevenue, 0))}</p>
+                </div>
+              </div>
+
+              <div style={{ overflowX: 'auto', border: '1px solid #edf2f7', borderRadius: '8px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '640px' }}>
+                  <thead>
+                    <tr style={{ background: '#f7fafc', borderBottom: '1px solid #e2e8f0' }}>
+                      <th style={{ padding: '0.8rem', textAlign: 'left', color: '#4a5568', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Period</th>
+                      <th style={{ padding: '0.8rem', textAlign: 'left', color: '#4a5568', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Orders</th>
+                      <th style={{ padding: '0.8rem', textAlign: 'left', color: '#4a5568', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Revenue</th>
+                      <th style={{ padding: '0.8rem', textAlign: 'left', color: '#4a5568', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Avg Order Value</th>
+                      <th style={{ padding: '0.8rem', textAlign: 'left', color: '#4a5568', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Last Order Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reportData.map(row => (
+                      <tr key={row.key} style={{ borderBottom: '1px solid #edf2f7' }}>
+                        <td style={{ padding: '0.8rem', color: '#2d3748', fontWeight: 600 }}>{row.label}</td>
+                        <td style={{ padding: '0.8rem', color: '#4a5568' }}>{row.orderCount}</td>
+                        <td style={{ padding: '0.8rem', color: '#2d3748', fontWeight: 600 }}>{formatCurrency(row.totalRevenue)}</td>
+                        <td style={{ padding: '0.8rem', color: '#4a5568' }}>{formatCurrency(row.avgOrderValue)}</td>
+                        <td style={{ padding: '0.8rem', color: '#718096' }}>{new Date(row.lastOrderDate).toLocaleDateString('en-IN')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </div>
       )}
@@ -2097,6 +2273,183 @@ const IssuesManagement = () => {
   )
 }
 
+const PdfReportTemplate = ({ data, reportTrend, rangeLabel }) => {
+  if (!data) return null;
+
+  const kpis = data.kpiCards || {}
+  const trendData = data.monthlySalesTrend || []
+  
+  // Calculate Growth Metrics
+  let orderGrowth = 0, revenueGrowth = 0, unitsGrowth = 0;
+  let firstTrend = null, lastTrend = null;
+  if (trendData.length > 1) {
+    firstTrend = trendData[0]
+    lastTrend = trendData[trendData.length - 1]
+    const formatGrowth = (orig, cur) => orig > 0 ? ((cur - orig) / orig * 100).toFixed(1) : 0;
+    orderGrowth = formatGrowth(firstTrend.orderCount, lastTrend.orderCount);
+    revenueGrowth = formatGrowth(firstTrend.totalRevenue, lastTrend.totalRevenue);
+    unitsGrowth = formatGrowth(firstTrend.totalSales, lastTrend.totalSales);
+  } else if (trendData.length === 1) {
+    firstTrend = trendData[0]
+    lastTrend = trendData[0]
+  }
+
+  return (
+    <div id="pdf-report-container" style={{
+      position: 'absolute', top: '-9999px', left: '-9999px', width: '1000px',
+      background: '#fff', padding: '30px', fontFamily: '"Segoe UI", sans-serif', color: '#111827', boxSizing: 'border-box'
+    }}>
+      {/* 1. Title */}
+      <div style={{ textAlign: 'center', marginBottom: '20px', borderBottom: '2px solid #e5e7eb', paddingBottom: '15px' }}>
+        <h1 style={{ fontSize: '28px', margin: 0, color: '#1e3a8a' }}>Tex Weave Impex Analytics Report</h1>
+        <p style={{ fontSize: '16px', color: '#6b7280', marginTop: '6px' }}>
+          Period: {rangeLabel} | Trend: {reportTrend.charAt(0).toUpperCase() + reportTrend.slice(1)}ly
+        </p>
+      </div>
+
+      {/* 2. Executive Summary */}
+      <div style={{ marginBottom: '20px', background: '#f8fafc', padding: '15px', borderRadius: '8px', borderLeft: '4px solid #3b82f6' }}>
+        <h2 style={{ margin: '0 0 10px 0', fontSize: '20px', color: '#1e40af' }}>Executive Summary</h2>
+        <ul style={{ fontSize: '15px', lineHeight: '1.5', margin: 0, paddingLeft: '20px' }}>
+          {firstTrend && lastTrend && firstTrend !== lastTrend ? (
+            <>
+              <li>Revenue {revenueGrowth >= 0 ? 'increased' : 'decreased'} from &#8377;{firstTrend.totalRevenue.toLocaleString()} to &#8377;{lastTrend.totalRevenue.toLocaleString()}.</li>
+              <li>Fabric Orders went from {firstTrend.orderCount} &rarr; {lastTrend.orderCount} ({orderGrowth >= 0 ? `+${orderGrowth}%` : `${orderGrowth}%`}).</li>
+              <li>AOV remains strong at &#8377;{kpis.averageOrderValue?.toLocaleString() || 0}.</li>
+            </>
+          ) : (
+            <li>Insufficient time-series data for comparison.</li>
+          )}
+          <li style={{ fontWeight: 'bold', marginTop: '6px', color: '#166534' }}>Rec: Assess production capacity to match demand trends.</li>
+        </ul>
+      </div>
+
+      {/* 3. KPI Dashboard */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px', marginBottom: '25px' }}>
+        {[
+          { label: 'Fabric Orders', val: kpis.totalOrders || 0, color: '#3b82f6' },
+          { label: 'Total Revenue', val: `₹${kpis.totalRevenue?.toLocaleString() || 0}`, color: '#10b981' },
+          { label: 'Customers', val: kpis.totalCustomers || 0, color: '#8b5cf6' },
+          { label: 'Avg Order Value', val: `₹${kpis.averageOrderValue?.toLocaleString() || 0}`, color: '#f59e0b' }
+        ].map(k => (
+          <div key={k.label} style={{ background: '#fff', border: `2px solid ${k.color}`, borderRadius: '10px', padding: '15px', textAlign: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+            <div style={{ fontSize: '12px', color: '#4b5563', textTransform: 'uppercase', fontWeight: 700, marginBottom: '6px' }}>{k.label}</div>
+            <div style={{ fontSize: '24px', color: k.color, fontWeight: 'bold' }}>{k.val}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* 4. Charts */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '25px', marginBottom: '25px' }}>
+        <div style={{ border: '1px solid #e5e7eb', borderRadius: '10px', padding: '15px', background: '#fff' }}>
+          <h3 style={{ margin: '0 0 15px 0', textAlign: 'center', color: '#374151', fontSize: '16px' }}>Revenue Growth (₹)</h3>
+          <ResponsiveContainer width="100%" height={200}>
+            <RechartsLineChart data={trendData}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+              <XAxis dataKey="label" stroke="#6b7280" tick={{fontSize: 11}} />
+              <YAxis stroke="#6b7280" tick={{fontSize: 11}} width={80} />
+              <Tooltip />
+              <Line isAnimationActive={false} type="monotone" dataKey="totalRevenue" name="Revenue" stroke="#10b981" strokeWidth={3} dot={{ r: 3, fill: '#10b981' }} />
+            </RechartsLineChart>
+          </ResponsiveContainer>
+        </div>
+        <div style={{ border: '1px solid #e5e7eb', borderRadius: '10px', padding: '15px', background: '#fff' }}>
+          <h3 style={{ margin: '0 0 15px 0', textAlign: 'center', color: '#374151', fontSize: '16px' }}>Orders vs Fabric Units (m/rolls)</h3>
+          <ResponsiveContainer width="100%" height={200}>
+            <RechartsBarChart data={trendData}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+              <XAxis dataKey="label" stroke="#6b7280" tick={{fontSize: 11}} />
+              <YAxis yAxisId="left" orientation="left" stroke="#6b7280" tick={{fontSize: 11}} width={30} />
+              <YAxis yAxisId="right" orientation="right" stroke="#6b7280" tick={{fontSize: 11}} width={30} />
+              <Tooltip />
+              <RechartsLegend wrapperStyle={{fontSize: '11px', paddingTop: '5px'}} />
+              <Bar yAxisId="left" isAnimationActive={false} dataKey="orderCount" name="Orders" fill="#3b82f6" radius={[3, 3, 0, 0]} />
+              <Bar yAxisId="right" isAnimationActive={false} dataKey="totalSales" name="Units" fill="#f59e0b" radius={[3, 3, 0, 0]} />
+            </RechartsBarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* 7. Growth Metrics & 5. Sales Trend Table */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '25px', marginBottom: '25px' }}>
+        <div>
+          <h3 style={{ margin: '0 0 10px 0', color: '#1f2937', fontSize: '16px' }}>Growth Metrics</h3>
+          <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden' }}>
+            <thead>
+              <tr style={{ background: '#f3f4f6' }}>
+                <th style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #e5e7eb', fontWeight: 600, fontSize: '13px' }}>Metric</th>
+                <th style={{ padding: '8px', textAlign: 'right', borderBottom: '1px solid #e5e7eb', fontWeight: 600, fontSize: '13px' }}>Growth</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td style={{ padding: '8px', borderBottom: '1px solid #e5e7eb', fontWeight: 500, fontSize: '13px' }}>Fabric Orders</td><td style={{ padding: '8px', textAlign: 'right', borderBottom: '1px solid #e5e7eb', color: orderGrowth >= 0 ? '#059669' : '#dc2626', fontWeight: 700, fontSize: '13px' }}>{orderGrowth > 0 ? '+' : ''}{orderGrowth}%</td></tr>
+              <tr><td style={{ padding: '8px', borderBottom: '1px solid #e5e7eb', fontWeight: 500, fontSize: '13px' }}>Revenue</td><td style={{ padding: '8px', textAlign: 'right', borderBottom: '1px solid #e5e7eb', color: revenueGrowth >= 0 ? '#059669' : '#dc2626', fontWeight: 700, fontSize: '13px' }}>{revenueGrowth > 0 ? '+' : ''}{revenueGrowth}%</td></tr>
+              <tr><td style={{ padding: '8px', borderBottom: '1px solid #e5e7eb', fontWeight: 500, fontSize: '13px' }}>Units (m/rolls)</td><td style={{ padding: '8px', textAlign: 'right', borderBottom: '1px solid #e5e7eb', color: unitsGrowth >= 0 ? '#059669' : '#dc2626', fontWeight: 700, fontSize: '13px' }}>{unitsGrowth > 0 ? '+' : ''}{unitsGrowth}%</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div>
+          <h3 style={{ margin: '0 0 10px 0', color: '#1f2937', fontSize: '16px' }}>Sales Trend</h3>
+          <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #e5e7eb', fontSize: '12px' }}>
+            <thead>
+              <tr style={{ background: '#3b82f6', color: 'white' }}>
+                <th style={{ padding: '6px 8px', textAlign: 'left' }}>Period</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Orders</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Units</th>
+                <th style={{ padding: '6px 8px', textAlign: 'right' }}>Revenue (₹)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {trendData.slice(0, 6).map((t, i) => (
+                <tr key={i} style={{ background: i % 2 === 0 ? '#fff' : '#f9fafb' }}>
+                  <td style={{ padding: '6px 8px', borderBottom: '1px solid #e5e7eb' }}>{t.label}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', borderBottom: '1px solid #e5e7eb' }}>{t.orderCount}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', borderBottom: '1px solid #e5e7eb' }}>{t.totalSales}</td>
+                  <td style={{ padding: '6px 8px', textAlign: 'right', borderBottom: '1px solid #e5e7eb' }}>{t.totalRevenue?.toLocaleString()}</td>
+                </tr>
+              ))}
+              {trendData.length > 6 && (
+                <tr><td colSpan="4" style={{ padding: '6px 8px', textAlign: 'center', fontStyle: 'italic', color: '#6b7280' }}>...and {trendData.length - 6} more</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 6. Key Insights & 5. Recommendations */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '25px', marginBottom: '25px' }}>
+        <div style={{ background: '#eff6ff', padding: '15px', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
+          <h3 style={{ margin: '0 0 10px 0', color: '#1d4ed8', fontSize: '16px' }}>Key Insights</h3>
+          <ul style={{ margin: 0, paddingLeft: '18px', lineHeight: '1.4', fontSize: '13px' }}>
+            <li>Revenue driven by bulk B2B orders.</li>
+            <li>High AOV (₹{kpis.averageOrderValue?.toLocaleString()}) indicates wholesale demand.</li>
+            {(kpis.totalCustomers || 0) < 50 && <li style={{ color: '#b45309' }}>Small customer base ({kpis.totalCustomers}) &rarr; dependency risk.</li>}
+            {orderGrowth > 50 && <li>High order volume growth observed.</li>}
+          </ul>
+        </div>
+        <div style={{ background: '#f0fdf4', padding: '15px', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
+          <h3 style={{ margin: '0 0 10px 0', color: '#15803d', fontSize: '16px' }}>Recommendations</h3>
+          <ul style={{ margin: 0, paddingLeft: '18px', lineHeight: '1.4', fontSize: '13px' }}>
+            <li style={{ fontWeight: 600 }}>Scale production capacity.</li>
+            <li>Expand B2B customer base.</li>
+            <li>Introduce smaller MOQs for retail buyers.</li>
+            <li>Optimize logistics for volume scaling.</li>
+          </ul>
+        </div>
+      </div>
+
+      {/* 8. Limitations */}
+      <div style={{ color: '#6b7280', fontSize: '12px', borderTop: '1px solid #e5e7eb', paddingTop: '10px' }}>
+        <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', gap: '30px' }}>
+          <li>Data bounded to ({rangeLabel}).</li>
+          <li>No product breakdown included.</li>
+        </ul>
+      </div>
+    </div>
+  );
+};
+
 // Analytics Section Component
 const AnalyticsSection = () => {
   const [loading, setLoading] = useState(true)
@@ -2137,6 +2490,86 @@ const AnalyticsSection = () => {
   const [salesDrillCategory, setSalesDrillCategory] = useState('')
   const [salesDrillProductId, setSalesDrillProductId] = useState('')
   const [salesDrillProductName, setSalesDrillProductName] = useState('')
+  const [showReportModal, setShowReportModal] = useState(false)
+  const [reportTrend, setReportTrend] = useState('year')
+  const [generatingReport, setGeneratingReport] = useState(false)
+  const [pdfReportData, setPdfReportData] = useState(null)
+  const [reportDateMode, setReportDateMode] = useState('dashboard')
+  const [reportStartDate, setReportStartDate] = useState('')
+  const [reportEndDate, setReportEndDate] = useState('')
+
+  const generatePDFReport = async () => {
+    try {
+      setGeneratingReport(true)
+      const start = reportTrend === 'custom' ? reportStartDate : startDate
+      const end = reportTrend === 'custom' ? reportEndDate : endDate
+      const normalizedStart = start <= end ? start : end
+      const normalizedEnd = end >= start ? end : start
+      
+      let finalGranularity = reportTrend
+      if (reportTrend === 'custom') {
+        const diffTime = Math.abs(new Date(normalizedEnd) - new Date(normalizedStart))
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+        if (diffDays <= 14) finalGranularity = 'day'
+        else if (diffDays <= 90) finalGranularity = 'week'
+        else if (diffDays <= 365) finalGranularity = 'month'
+        else finalGranularity = 'year'
+      }
+      
+      const res = await axios.get('/api/analytics/dashboard', {
+        params: {
+          startDate: normalizedStart,
+          endDate: normalizedEnd,
+          granularity: finalGranularity
+        }
+      })
+      
+      setPdfReportData(res.data)
+      
+      // Allow ReactDOM to flush and Recharts to render the hidden elements
+      setTimeout(async () => {
+        try {
+          const el = document.getElementById('pdf-report-container')
+          if (!el) throw new Error('Report template not found in DOM')
+          
+          const canvas = await html2canvas(el, { scale: 2, useCORS: true, logging: false })
+          const imgData = canvas.toDataURL('image/png')
+          
+          const doc = new jsPDF('p', 'mm', 'a4')
+          const pageWidth = doc.internal.pageSize.getWidth()
+          const pageHeight = doc.internal.pageSize.getHeight()
+          
+          const imgWidth = pageWidth
+          const imgHeight = (canvas.height * imgWidth) / canvas.width
+          
+          let heightLeft = imgHeight
+          let position = 0
+
+          doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+          heightLeft -= pageHeight
+
+          while (heightLeft > 0) {
+            position = heightLeft - imgHeight
+            doc.addPage()
+            doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+            heightLeft -= pageHeight
+          }
+
+          doc.save(`Analytics_Report_${normalizedStart}_to_${normalizedEnd}.pdf`)
+        } catch (captureErr) {
+          console.error('Canvas capture failed:', captureErr)
+          alert('Failed to generate report PDF.')
+        } finally {
+          setGeneratingReport(false)
+          setShowReportModal(false)
+        }
+      }, 500)
+    } catch (err) {
+      console.error('Error generating PDF report:', err)
+      alert('Failed to generate report')
+      setGeneratingReport(false)
+    }
+  }
 
   const fetchAnalytics = async (opts = {}) => {
     const start = opts.startDate || startDate
@@ -2701,8 +3134,8 @@ const AnalyticsSection = () => {
 
         {/* #15 Low Stock Detection → Table + Alert */}
         {lowStock.length > 0 && (
-          <div className="charts-row">
-            <div className="chart-full">
+          <div className="charts-row inventory-low-stock-row">
+            <div className="chart-full" style={{ minHeight: 'auto' }}>
               <div className="analytics-card">
                 <h3 className="card-title" style={{ color: '#f5576c', display: 'flex', alignItems: 'center', gap: 8 }}>
                   <AlertCircle size={18} /> Low Stock Detection — {lowStock.length} items need attention
@@ -2749,12 +3182,12 @@ const AnalyticsSection = () => {
 
         {/* #16 Fast Moving | #17 Slow Moving */}
         {(data.fastMovingProducts || []).length < 2 && (data.slowMovingProducts || []).length === 0 && (
-          <div style={{ background: '#fffbeb', border: '1px solid #f6ad55', borderRadius: '8px', padding: '0.75rem 1rem', marginBottom: '1rem', color: '#7b341e', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ background: '#fffbeb', border: '1px solid #f6ad55', borderRadius: '8px', padding: '0.75rem 1rem', marginBottom: 0, color: '#7b341e', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span>⚠️</span>
             <span><strong>Limited dataset:</strong> You need at least 2 distinct products with sales data in the last 90 days to split Fast vs Slow moving. Add more sales data to see the comparison.</span>
           </div>
         )}
-        <div className="charts-row">
+        <div className="charts-row inventory-fast-slow-row">
           <div className="chart-half">
             <BarChart
               data={data.fastMovingProducts || []}
@@ -2795,9 +3228,23 @@ const AnalyticsSection = () => {
 
   return (
     <div className="analytics-section-container">
-      <div className="analytics-header">
-        <h2>Business Analytics &amp; Insights</h2>
-        <p>Dynamic analytics for {getRangeLabel()} with drill-down exploration</p>
+      <div className="analytics-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <h2>Business Analytics &amp; Insights</h2>
+          <p>Dynamic analytics for {getRangeLabel()} with drill-down exploration</p>
+        </div>
+        <button
+          className="analytics-primary-btn"
+          onClick={() => {
+            setReportStartDate(startDate)
+            setReportEndDate(endDate)
+            setReportTrend('year')
+            setShowReportModal(true)
+          }}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+        >
+          <Download size={18} /> Generate Report
+        </button>
       </div>
 
       <div className="analytics-filters">
@@ -2890,6 +3337,92 @@ const AnalyticsSection = () => {
       <div className="analytics-content">
         {renderTabContent()}
       </div>
+
+      {generatingReport && pdfReportData && (
+        <PdfReportTemplate 
+          data={pdfReportData} 
+          reportTrend={reportTrend} 
+          rangeLabel={reportTrend === 'custom' ? `${toDisplayDate(reportStartDate)} to ${toDisplayDate(reportEndDate)}` : getRangeLabel()} 
+        />
+      )}
+
+      {showReportModal && (
+        <div className="custom-modal-overlay">
+          <div className="custom-modal-content" style={{ maxWidth: '400px' }}>
+            <div className="modal-header">
+              <h3>Generate Analytics Report</h3>
+              <button 
+                type="button" 
+                className="close-button" 
+                onClick={() => setShowReportModal(false)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body" style={{ padding: '24px' }}>
+              <div className="form-group">
+                <label style={{ fontSize: '13px', fontWeight: 600, color: '#4b5563', textTransform: 'uppercase' }}>Report Trend</label>
+                <select 
+                  className="form-control"
+                  value={reportTrend} 
+                  onChange={(e) => setReportTrend(e.target.value)}
+                  style={{ width: '100%', padding: '10px', marginTop: '8px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+                >
+                  <option value="year">Yearly</option>
+                  <option value="month">Monthly</option>
+                  <option value="week">Weekly</option>
+                  <option value="day">Daily</option>
+                  <option value="custom">Custom</option>
+                </select>
+
+                {reportTrend === 'custom' && (
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ fontSize: '12px', color: '#6b7280' }}>From</label>
+                      <input 
+                        type="date" 
+                        className="form-control"
+                        value={reportStartDate} 
+                        onChange={e => setReportStartDate(e.target.value)} 
+                        style={{ width: '100%', padding: '10px', marginTop: '4px', borderRadius: '6px', border: '1px solid #d1d5db', boxSizing: 'border-box' }} 
+                      />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ fontSize: '12px', color: '#6b7280' }}>To</label>
+                      <input 
+                        type="date" 
+                        className="form-control"
+                        value={reportEndDate} 
+                        onChange={e => setReportEndDate(e.target.value)} 
+                        style={{ width: '100%', padding: '10px', marginTop: '4px', borderRadius: '6px', border: '1px solid #d1d5db', boxSizing: 'border-box' }} 
+                      />
+                    </div>
+                  </div>
+                )}
+
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
+                <button
+                  type="button"
+                  className="analytics-secondary-btn"
+                  onClick={() => setShowReportModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="analytics-primary-btn"
+                  onClick={generatePDFReport}
+                  disabled={generatingReport}
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                >
+                  {generatingReport ? 'Generating...' : <><Download size={16} /> Download Report</>}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -2968,9 +3501,14 @@ const AdminOrders = () => {
     new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
 
   const formatShortOrderId = (order) => {
+    // Use the actual orderId from database if available (new format)
+    if (order?.orderId) {
+      return order.orderId
+    }
+    // Fallback for backward compatibility
     const rawDate = order?.createdAt ? new Date(order.createdAt) : null
     if (!rawDate || Number.isNaN(rawDate.getTime())) {
-      return order?.orderId || order?._id?.slice(-8)?.toUpperCase() || 'ORD-NA'
+      return order?._id?.slice(-8)?.toUpperCase() || 'ORD-NA'
     }
 
     const yyyy = rawDate.getFullYear()
@@ -2980,10 +3518,10 @@ const AdminOrders = () => {
 
     const customerName = (order?.customerInfo?.name || order?.user?.name || '').toUpperCase()
     const letters = customerName.replace(/[^A-Z]/g, '')
-    const fallback = (order?.orderId || order?._id || 'XXX').toUpperCase().replace(/[^A-Z0-9]/g, '')
-    const suffix = (letters.slice(0, 3) || fallback.slice(-3) || 'XXX').padEnd(3, 'X')
+    const fallback = order?._id?.toUpperCase().replace(/[^A-Z0-9]/g, '')
+    const suffix = (letters.slice(0, 3) || fallback?.slice(-3) || 'XXX').padEnd(3, 'X')
 
-    return `ORD-${datePart}-${suffix}`
+    return `#ORD-${datePart}-${suffix}`
   }
 
   const getItemNames = (order) => {

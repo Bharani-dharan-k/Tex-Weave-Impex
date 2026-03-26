@@ -5,6 +5,7 @@ import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import User from '../models/User.js';
 import Sales from '../models/Sales.js';
+import Inventory from '../models/Inventory.js';
 
 const resolveRegionFromAddress = (address = {}) => {
   const state = String(address?.state || '').toLowerCase();
@@ -413,8 +414,8 @@ export const reorderOrder = async (req, res) => {
   try {
     const order = await Order.findOne({
       _id: req.params.id,
-      userId: req.user._id
-    }).populate('items.productId');
+      user: req.user._id
+    }).populate('items.product');
 
     if (!order) {
       return res.status(404).json({
@@ -423,27 +424,52 @@ export const reorderOrder = async (req, res) => {
       });
     }
 
+    // Only allow reorder for cancelled orders
+    if (order.orderStatus !== 'cancelled') {
+      return res.status(400).json({
+        success: false,
+        message: 'Can only reorder cancelled orders'
+      });
+    }
+
     // Check product availability
     const availableItems = [];
     const unavailableItems = [];
 
     for (const item of order.items) {
-      const product = await Product.findById(item.productId._id);
+      const product = await Product.findById(item.product._id);
       
-      if (product && product.isActive && product.stockQuantity >= item.quantity) {
+      if (!product) {
+        unavailableItems.push({
+          productName: item.product.name,
+          reason: 'Product no longer available'
+        });
+        continue;
+      }
+
+      if (!product.isActive) {
+        unavailableItems.push({
+          productName: item.product.name,
+          reason: 'Product is inactive'
+        });
+        continue;
+      }
+
+      // Check inventory
+      const inventory = await Inventory.findOne({ productId: product.productId });
+      
+      if (!inventory || inventory.quantityInStock < item.quantity) {
+        unavailableItems.push({
+          productName: item.product.name,
+          reason: !inventory || inventory.quantityInStock === 0 
+            ? 'Out of stock' 
+            : `Insufficient stock (${inventory.quantityInStock} available, ${item.quantity} needed)`
+        });
+      } else {
         availableItems.push({
           productId: product._id,
           quantity: item.quantity,
           product: product
-        });
-      } else {
-        unavailableItems.push({
-          productName: item.productId.name,
-          reason: !product 
-            ? 'Product no longer available' 
-            : !product.isActive 
-            ? 'Product is inactive' 
-            : 'Insufficient stock'
         });
       }
     }
