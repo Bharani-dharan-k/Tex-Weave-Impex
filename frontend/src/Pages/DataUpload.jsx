@@ -16,6 +16,7 @@ const DataUpload = () => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       // Validate file type
+      //hsh
       const validTypes = ['text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
       if (validTypes.includes(selectedFile.type) || selectedFile.name.endsWith('.csv') || selectedFile.name.endsWith('.xlsx')) {
         setFile(selectedFile);
