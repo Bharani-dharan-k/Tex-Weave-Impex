@@ -210,7 +210,7 @@ export const verifyPayment = async (req, res) => {
       });
     }
 
-    // Update order by either Mongo _id or business orderId (ORD-...), scoped by Razorpay order id
+    // Update order by Razorpay order id and optionally match either Mongo _id or business orderId.
     const orderQuery = { razorpayOrderId };
 
     if (orderId) {
